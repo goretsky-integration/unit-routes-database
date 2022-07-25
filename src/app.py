@@ -18,4 +18,4 @@ async def on_startup():
 @app.on_event('shutdown')
 async def on_shutdown():
     await redis_db.close_connection()
-    await mongo_db.close_connection()
+    mongo_db.close_connection()

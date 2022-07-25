@@ -18,6 +18,6 @@ reports = db.reports
 accounts = db.accounts
 
 
-async def close_connection():
-    await client.close()
+def close_connection():
+    client.close()
     logger.debug('Mongodb connection has been closed')
