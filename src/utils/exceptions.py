@@ -1,6 +1,8 @@
 """
-- NoCookiesError
-- NoTokenError
+- NotFoundError
+    - NoCookiesError
+    - NoTokenError
+    - NoReportError
 - DatabaseConnectionError
 """
 
@@ -8,22 +10,23 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 
 
-class NoCookiesError(HTTPException):
+class NotFoundError(HTTPException):
+    detail = 'Not found'
 
-    def __init__(self, account_name: str):
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'No cookies by account name "{account_name}"',
-        )
+    def __init__(self):
+        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=self.detail)
 
 
-class NoTokenError(HTTPException):
+class NoReportError(NotFoundError):
+    detail = 'Report by this report type and chat id did not found'
 
-    def __init__(self, account_name: str):
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'No access token by account name "{account_name}"',
-        )
+
+class NoCookiesError(NotFoundError):
+    detail = 'Cookies did not found'
+
+
+class NoTokenError(NotFoundError):
+    detail = 'Token did not found'
 
 
 class DatabaseConnectionError(HTTPException):

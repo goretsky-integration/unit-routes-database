@@ -20,7 +20,7 @@ router = APIRouter(prefix='/auth', tags=['Authentication credentials'])
             'content': {
                 'application/json': {
                     'example': {
-                        'error': 'No token by account name "your account name"',
+                        'error': 'Token did not found',
                     },
                 },
             },
@@ -44,7 +44,7 @@ async def get_access_token(
             'content': {
                 'application/json': {
                     'example': {
-                        'error': 'No cookies by account name "your account name"',
+                        'error': 'Cookies did not found',
                     },
                 },
             },
