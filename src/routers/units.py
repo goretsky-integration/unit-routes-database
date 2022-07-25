@@ -7,7 +7,12 @@ from repositories import UnitRepository
 router = APIRouter(prefix='/units', tags=['Database'])
 
 
-@router.get(path='/', status_code=status.HTTP_200_OK, response_model=list[models.Unit])
+@router.get(
+    path='/',
+    status_code=status.HTTP_200_OK,
+    response_model=list[models.Unit],
+    response_model_by_alias=False,
+)
 async def get_all(
         limit: int = 100,
         skip: int = 0,
