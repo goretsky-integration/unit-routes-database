@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 
 import routers
-from db import redis_db
+from db import redis_db, mongo_db
 
 app = FastAPI()
 app.include_router(routers.auth.router)
+app.include_router(routers.units.router)
+app.include_router(routers.reports.router)
 app.include_router(routers.ping.router)
 
 
@@ -16,3 +18,4 @@ async def on_startup():
 @app.on_event('shutdown')
 async def on_shutdown():
     await redis_db.close_connection()
+    await mongo_db.close_connection()

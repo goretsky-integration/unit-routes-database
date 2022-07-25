@@ -11,6 +11,8 @@ redis = "^4.3.4"
 loguru = "^0.6.0"
 uvicorn = "^0.18.2"
 python-dotenv = "^0.20.0"
+motor = "^3.0.0"
+dnspython = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
 

@@ -7,6 +7,7 @@ from pydantic import BaseSettings, Field
 __all__ = (
     'get_app_settings',
     'get_redis_settings',
+    'get_mongo_db_settings',
     'ROOT_PATH',
     'LOG_FILE_PATH',
 )
@@ -23,6 +24,10 @@ class AppSettings(BaseSettings):
     debug: bool = Field(..., env='DEBUG')
 
 
+class MongoDBSettings(BaseSettings):
+    url: str = Field(..., env='MONGO_DB_URL')
+
+
 class RedisSettings(BaseSettings):
     url: str = Field(..., env='REDIS_URL')
 
@@ -35,3 +40,8 @@ def get_app_settings() -> AppSettings:
 @lru_cache
 def get_redis_settings() -> RedisSettings:
     return RedisSettings()
+
+
+@lru_cache
+def get_mongo_db_settings() -> MongoDBSettings:
+    return MongoDBSettings()

@@ -17,10 +17,6 @@ class NotFoundError(HTTPException):
         super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=self.detail)
 
 
-class NoReportError(NotFoundError):
-    detail = 'Report by this report type and chat id did not found'
-
-
 class NoCookiesError(NotFoundError):
     detail = 'Cookies did not found'
 
