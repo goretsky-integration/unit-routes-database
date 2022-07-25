@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status
 
+import models
 from repositories import AccessTokenRepository, CookiesRepository
 from routers.dependencies import (
     get_access_tokens_repository,
@@ -13,7 +14,7 @@ router = APIRouter(prefix='/auth', tags=['Authentication credentials'])
     path='/token/',
     responses={
         status.HTTP_200_OK: {
-            'model': str,
+            'model': models.Token,
         },
         status.HTTP_404_NOT_FOUND: {
             'content': {
