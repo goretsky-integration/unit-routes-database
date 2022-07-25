@@ -17,3 +17,8 @@ async def get_all(
     if region is not None:
         return await units.get_by_region(region, limit, skip)
     return await units.get_all(limit, skip)
+
+
+@router.get('/regions/', status_code=status.HTTP_200_OK, response_model=list[models.Region])
+async def get_regions():
+    return list(models.Region)
