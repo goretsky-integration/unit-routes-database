@@ -7,6 +7,7 @@ app = FastAPI()
 app.include_router(routers.auth.router)
 app.include_router(routers.units.router)
 app.include_router(routers.reports.router)
+app.include_router(routers.accounts.router)
 app.include_router(routers.ping.router)
 
 

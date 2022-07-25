@@ -4,6 +4,7 @@ from repositories import (
     AccessTokenRepository,
     UnitRepository,
     ReportRepository,
+    AccountRepository,
 )
 
 __all__ = (
@@ -11,6 +12,7 @@ __all__ = (
     'get_cookies_repository',
     'get_units_repository',
     'get_access_tokens_repository',
+    'get_accounts_repository',
 )
 
 
@@ -28,3 +30,7 @@ def get_units_repository() -> UnitRepository:
 
 def get_reports_repository() -> ReportRepository:
     return ReportRepository(mongo_db.reports)
+
+
+def get_accounts_repository() -> AccountRepository:
+    return AccountRepository(mongo_db.accounts)
