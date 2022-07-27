@@ -38,7 +38,7 @@ async def get_access_token(
     path='/cookies/',
     responses={
         status.HTTP_200_OK: {
-            'model': dict[str, str],
+            'model': models.AuthCookies,
         },
         status.HTTP_404_NOT_FOUND: {
             'content': {

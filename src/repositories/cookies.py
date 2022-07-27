@@ -1,7 +1,6 @@
-import json
-
-from utils import exceptions
+import models
 from repositories.base import BaseRepository
+from utils import exceptions
 
 __all__ = (
     'CookiesRepository',
@@ -10,8 +9,8 @@ __all__ = (
 
 class CookiesRepository(BaseRepository):
 
-    async def get_by_account_name(self, account_name: str) -> str:
-        cookies = await self._database.get(f'cookies_{account_name}')
+    async def get_by_account_name(self, account_name: str) -> models.AuthCookies:
+        cookies = await self._database.find_one({'account_name': account_name}, {'_id': 0})
         if cookies is None:
             raise exceptions.NoCookiesError
-        return json.loads(cookies)
+        return models.AuthCookies.parse_obj(cookies)

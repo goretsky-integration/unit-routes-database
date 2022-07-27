@@ -9,6 +9,8 @@ __all__ = (
     'accounts',
     'report_types',
     'statistics_report_types',
+    'cookies',
+    'tokens',
     'close_connection',
 )
 
@@ -19,6 +21,8 @@ reports = db.reports
 accounts = db.accounts
 report_types = db.report_types
 statistics_report_types = db.statistics_report_types
+cookies = db.cookies
+tokens = db.tokens
 
 
 def close_connection():

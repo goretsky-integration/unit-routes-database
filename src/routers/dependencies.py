@@ -1,4 +1,4 @@
-from db import redis_db, mongo_db
+from db import mongo_db
 from repositories import (
     CookiesRepository,
     AccessTokenRepository,
@@ -21,11 +21,11 @@ __all__ = (
 
 
 def get_access_tokens_repository() -> AccessTokenRepository:
-    return AccessTokenRepository(redis_db.connection)
+    return AccessTokenRepository(mongo_db.tokens)
 
 
 def get_cookies_repository() -> CookiesRepository:
-    return CookiesRepository(redis_db.connection)
+    return CookiesRepository(mongo_db.cookies)
 
 
 def get_units_repository() -> UnitRepository:

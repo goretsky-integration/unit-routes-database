@@ -11,7 +11,7 @@ __all__ = (
 class AccessTokenRepository(BaseRepository):
 
     async def get_by_account_name(self, account_name: str) -> models.Token:
-        access_token = await self._database.get(f'token_{account_name}')
-        if access_token is None:
+        tokens = await self._database.find_one({'account_name': account_name}, {'_id': 0, 'refresh_token': 0})
+        if tokens is None:
             raise exceptions.NoTokenError
-        return models.Token(access_token=access_token)
+        return models.Token.parse_obj(tokens)
