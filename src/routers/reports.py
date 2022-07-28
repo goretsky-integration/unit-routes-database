@@ -9,9 +9,9 @@ router = APIRouter(prefix='/reports', tags=['Database'])
 
 @router.get(path='/', status_code=status.HTTP_200_OK, response_model=list[models.Report])
 async def get_all(
-        report_type: models.ReportType | None = None,
         limit: int = 100,
         skip: int = 0,
+        report_type: str | None = None,
         chat_id: int | None = None,
         reports: ReportRepository = Depends(get_reports_repository),
 ):
