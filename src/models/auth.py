@@ -9,6 +9,7 @@ __all__ = (
 class Token(BaseModel):
     account_name: str
     access_token: str
+    refresh_token: str
 
 
 class AuthCookies(BaseModel):

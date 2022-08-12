@@ -14,3 +14,8 @@ class CookiesRepository(BaseRepository):
         if cookies is None:
             raise exceptions.NoCookiesError
         return models.AuthCookies.parse_obj(cookies)
+
+    async def update(self, cookies_in: models.AuthCookies):
+        query = {'account_name': cookies_in.account_name}
+        update = {'$set': {'cookies': cookies_in.cookies}}
+        await self._database.update_one(query, update, upsert=True)

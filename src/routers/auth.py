@@ -1,11 +1,8 @@
 from fastapi import APIRouter, Depends, status
 
 import models
-from repositories import AccessTokenRepository, CookiesRepository
-from routers.dependencies import (
-    get_access_tokens_repository,
-    get_cookies_repository,
-)
+from repositories import TokensRepository, CookiesRepository
+from routers.dependencies import get_tokens_repository, get_cookies_repository
 
 router = APIRouter(prefix='/auth', tags=['Authentication credentials'])
 
@@ -29,7 +26,7 @@ router = APIRouter(prefix='/auth', tags=['Authentication credentials'])
 )
 async def get_access_token(
         account_name: str,
-        tokens: AccessTokenRepository = Depends(get_access_tokens_repository),
+        tokens: TokensRepository = Depends(get_tokens_repository),
 ):
     return await tokens.get_by_account_name(account_name)
 
@@ -56,3 +53,25 @@ async def get_cookies(
         cookies: CookiesRepository = Depends(get_cookies_repository),
 ):
     return await cookies.get_by_account_name(account_name)
+
+
+@router.patch(
+    path='/token/',
+    status_code=status.HTTP_200_OK,
+)
+async def update_tokens(
+        tokens_in: models.Token,
+        tokens: TokensRepository = Depends(get_tokens_repository)
+):
+    return await tokens.update(tokens_in)
+
+
+@router.patch(
+    path='/cookies/',
+    status_code=status.HTTP_200_OK,
+)
+async def update_cookies(
+        cookies_in: models.AuthCookies,
+        cookies: CookiesRepository = Depends(get_cookies_repository)
+):
+    return await cookies.update(cookies_in)
