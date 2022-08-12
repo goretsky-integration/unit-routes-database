@@ -1,7 +1,7 @@
 from db import mongo_db
 from repositories import (
     CookiesRepository,
-    AccessTokenRepository,
+    TokensRepository,
     UnitRepository,
     ReportRepository,
     AccountRepository,
@@ -13,15 +13,15 @@ __all__ = (
     'get_reports_repository',
     'get_cookies_repository',
     'get_units_repository',
-    'get_access_tokens_repository',
+    'get_tokens_repository',
     'get_accounts_repository',
     'get_report_types_repository',
     'get_statistics_report_types_repository',
 )
 
 
-def get_access_tokens_repository() -> AccessTokenRepository:
-    return AccessTokenRepository(mongo_db.tokens)
+def get_tokens_repository() -> TokensRepository:
+    return TokensRepository(mongo_db.tokens)
 
 
 def get_cookies_repository() -> CookiesRepository:
