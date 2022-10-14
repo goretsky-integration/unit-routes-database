@@ -45,3 +45,9 @@ class ReportRepository(BaseRepository):
             {'$and': [{'report_type': report_type}, {'chat_id': chat_id}]},
             {'$pull': {'unit_ids': {'$in': unit_ids}}},
         )
+
+    async def get_chat_ids_and_unit_ids_by_report_type(
+            self, report_type: str,
+    ) -> list[models.ReportChatIdAndUnitIds]:
+        query = self._database.find({'report_type': report_type}, {'report_type': 0, '_id': 0})
+        return [models.ReportChatIdAndUnitIds.parse_obj(report) async for report in query]

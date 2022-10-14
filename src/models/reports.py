@@ -6,6 +6,7 @@ from pydantic import BaseModel, validator
 __all__ = (
     'Report',
     'ReportType',
+    'ReportChatIdAndUnitIds',
 )
 
 
@@ -23,5 +24,10 @@ class ReportType(str, Enum):
 
 class Report(BaseModel):
     report_type: ReportType
+    chat_id: int
+    unit_ids: list[int]
+
+
+class ReportChatIdAndUnitIds(BaseModel):
     chat_id: int
     unit_ids: list[int]

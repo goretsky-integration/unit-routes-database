@@ -32,3 +32,14 @@ async def delete_unit_id(
         reports: ReportRepository = Depends(get_reports_repository),
 ):
     return await reports.delete_unit_id(report_in.report_type, report_in.chat_id, report_in.unit_ids)
+
+
+@router.get(
+    path='/retranslate/{report_type}/',
+    response_model=list[models.ReportChatIdAndUnitIds],
+)
+async def get_chats_to_retranslate(
+        report_type: str,
+        reports: ReportRepository = Depends(get_reports_repository),
+):
+    return await reports.get_chat_ids_and_unit_ids_by_report_type(report_type)
