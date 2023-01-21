@@ -12,6 +12,7 @@ uvicorn = "^0.18.2"
 python-dotenv = "^0.20.0"
 motor = "^3.0.0"
 dnspython = "^2.2.1"
+fastapi-cache2 = {extras = ["redis"], version = "^0.2.0"}
 
 [tool.poetry.dev-dependencies]
 
