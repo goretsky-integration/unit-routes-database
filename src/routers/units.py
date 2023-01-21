@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, Depends
 import models
 from routers.dependencies import get_units_repository
 from repositories import UnitRepository
+from fastapi_cache.decorator import cache
 
 router = APIRouter(prefix='/units', tags=['Database'])
 
@@ -13,6 +14,7 @@ router = APIRouter(prefix='/units', tags=['Database'])
     response_model=list[models.Unit],
     response_model_by_alias=False,
 )
+@cache(expire=600)
 async def get_all(
         limit: int = 100,
         skip: int = 0,

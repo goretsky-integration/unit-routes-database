@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi_cache.decorator import cache
 
 import models
 from repositories import ReportTypeRepository, StatisticsReportTypeRepository
@@ -12,6 +13,7 @@ router = APIRouter(prefix='/report-types', tags=['Database'])
     response_model=list[models.ReportType],
     response_model_by_alias=False,
 )
+@cache(expire=600)
 async def get_report_types(
         skip: int = 0,
         limit: int = 100,
@@ -25,6 +27,7 @@ async def get_report_types(
     response_model=list[models.StatisticsReportType],
     response_model_by_alias=False,
 )
+@cache(expire=600)
 async def get_statistics_report_types(
         skip: int = 0,
         limit: int = 100,
