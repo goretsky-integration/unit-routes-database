@@ -9,7 +9,6 @@ router = APIRouter(prefix='/reports', tags=['Database'])
 
 
 @router.get(path='/', status_code=status.HTTP_200_OK, response_model=list[models.Report])
-@cache(expire=60)
 async def get_all(
         limit: int = 100,
         skip: int = 0,
@@ -40,7 +39,6 @@ async def delete_unit_id(
     path='/retranslate/{report_type}/',
     response_model=list[models.ReportChatIdAndUnitIds],
 )
-@cache(expire=60)
 async def get_chats_to_retranslate(
         report_type: str,
         reports: ReportRepository = Depends(get_reports_repository),
