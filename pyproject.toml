@@ -10,8 +10,6 @@ fastapi = "^0.79.0"
 loguru = "^0.6.0"
 uvicorn = "^0.18.2"
 python-dotenv = "^0.20.0"
-motor = "^3.0.0"
-dnspython = "^2.2.1"
 fastapi-cache2 = {extras = ["redis"], version = "^0.2.0"}
 sqlalchemy = "^2.0.0"
 psycopg2-binary = "^2.9.5"
