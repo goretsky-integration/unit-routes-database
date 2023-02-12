@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 
 from api import schemas, dependencies
 from repositories import UnitRepository, RegionRepository
@@ -6,7 +6,10 @@ from repositories import UnitRepository, RegionRepository
 router = APIRouter(prefix='/units')
 
 
-@router.get('/')
+@router.get(
+    path='/',
+    status_code=status.HTTP_200_OK,
+)
 def get_units(
         limit: int = Query(default=100, ge=1, le=100),
         skip: int = Query(default=0, ge=0),
