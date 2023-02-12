@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.base import Base
@@ -20,3 +20,5 @@ class ReportRoute(Base):
     telegram_chat: Mapped[TelegramChat] = relationship('TelegramChat')
     report_type: Mapped[ReportType] = relationship('ReportType')
     unit: Mapped[Unit] = relationship('Unit')
+
+    __table_args__ = (UniqueConstraint('telegram_chat_id', 'report_type_id', 'unit_id'),)
