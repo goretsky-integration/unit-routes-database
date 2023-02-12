@@ -1,22 +1,20 @@
-from enum import Enum
+from dataclasses import dataclass
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-__all__ = (
-    'Region',
-    'Unit',
-)
-
-
-class Region(str, Enum):
-    MOSCOW_4 = 'Москва 4'
-    SMOLUGA = 'Смолуга'
+__all__ = ('Unit', 'Region')
 
 
 class Unit(BaseModel):
-    id: int = Field(alias='_id')
+    id: int
     name: str
     uuid: UUID
     account_name: str
-    region: Region
+    region: str
+
+
+@dataclass(frozen=True, slots=True)
+class Region:
+    id: int
+    name: str
