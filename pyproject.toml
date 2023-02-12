@@ -12,6 +12,7 @@ uvicorn = "^0.18.2"
 fastapi-cache2 = {extras = ["redis"], version = "^0.2.0"}
 sqlalchemy = "^2.0.3"
 psycopg2-binary = "^2.9.5"
+python-dotenv = "^0.21.1"
 
 [tool.poetry.dev-dependencies]
 
