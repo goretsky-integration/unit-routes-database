@@ -44,19 +44,11 @@ class UnitRepository(BaseRepository):
             name: str,
             uuid: UUID,
             account_name: str,
-            region_name: str,
-    ) -> models.Unit:
-        unit = Unit(id=id_, name=name, uuid=uuid, account_name=account_name, region=Region(name=region_name))
+            region_id: int,
+    ):
+        unit = Unit(id=id_, name=name, uuid=uuid, account_name=account_name, region_id=region_id)
         try:
             with self._session_factory() as session, session.begin():
                 session.add(unit)
         except IntegrityError as error:
-            print(str(error))
             raise exceptions.AlreadyExistsInDatabase('Unit with this ID/name/UUID already exists')
-        return models.Unit(
-            id=unit.id,
-            name=unit.id,
-            uuid=unit.uuid,
-            account_name=unit.account_name,
-            region=unit.region.name,
-        )

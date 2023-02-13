@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, Response
 
 from api import schemas, dependencies
 from repositories import UnitRepository, RegionRepository
@@ -24,16 +24,16 @@ def create_unit(
         unit: schemas.Unit,
         regions: RegionRepository = Depends(dependencies.get_regions_repository),
         units: UnitRepository = Depends(dependencies.get_units_repository),
-) -> schemas.Unit:
-    region = regions.get_all()
-    unit_created = units.create(
+):
+    region = regions.get_by_name(name=unit.region)
+    units.create(
         id_=unit.id,
         name=unit.name,
         uuid=unit.uuid,
         account_name=unit.account_name,
-        region_name=unit.region,
+        region_id=region.id,
     )
-    return unit_created
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 @router.get('/regions/')
