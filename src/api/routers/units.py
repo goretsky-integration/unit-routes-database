@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status, Response
+from fastapi import APIRouter, Depends, Query, status, Response, Body
 
 from api import schemas, dependencies
 from repositories import UnitRepository, RegionRepository
@@ -41,3 +41,11 @@ def get_regions(
         regions: RegionRepository = Depends(dependencies.get_regions_repository),
 ) -> list[str]:
     return regions.get_all()
+
+
+@router.post('/regions/')
+def create_regions(
+        region: schemas.RegionCreate = Body(),
+        regions: RegionRepository = Depends(dependencies.get_regions_repository),
+):
+    return regions.create(name=region.name)
