@@ -39,7 +39,7 @@ class ReportRouteRepository(BaseRepository):
         return [
             models.ReportRoute(
                 report_type_name=report_route.report_type.name,
-                telegram_chat_id=report_route.telegram_chat.chat_id,
+                chat_id=report_route.telegram_chat.chat_id,
                 unit_id=report_route.unit_id
             ) for report_route in report_routes
         ]

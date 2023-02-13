@@ -9,7 +9,7 @@ __all__ = (
 @dataclass(frozen=True, slots=True)
 class ReportRoute:
     report_type_name: str
-    telegram_chat_id: int
+    chat_id: int
     unit_id: int
 
 
