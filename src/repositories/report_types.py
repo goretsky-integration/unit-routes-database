@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 
 import exceptions
@@ -41,3 +42,12 @@ class ReportTypeRepository(BaseRepository):
                 verbose_name=report_type.verbose_name,
             ) for report_type in report_types
         ]
+
+    def create(self, *, name: str, verbose_name: str, parent_id: int | None = None) -> None:
+        report_type = ReportType(name=name, verbose_name=verbose_name, parent_id=parent_id)
+        try:
+            with self._session_factory() as session:
+                with session.begin():
+                    session.add(report_type)
+        except IntegrityError:
+            raise exceptions.AlreadyExistsInDatabase('Report type already exists')
