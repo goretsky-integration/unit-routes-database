@@ -3,6 +3,7 @@ from dataclasses import dataclass
 __all__ = (
     'ReportRoute',
     'ReportChatIdAndUnitIds',
+    'GroupedByReportTypeAndChatIDReportRoute',
 )
 
 
@@ -11,6 +12,13 @@ class ReportRoute:
     report_type_name: str
     chat_id: int
     unit_id: int
+
+
+@dataclass(frozen=True, slots=True)
+class GroupedByReportTypeAndChatIDReportRoute:
+    report_type: str
+    chat_id: int
+    unit_ids: list[int]
 
 
 @dataclass(frozen=True, slots=True)

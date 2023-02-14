@@ -2,6 +2,7 @@ from fastapi import APIRouter, Query, Depends, Body, Response, status
 
 from api import schemas, dependencies
 from repositories import ReportRouteRepository, ReportTypeRepository, TelegramChatRepository
+from services.report_routes import group_report_routes_by_report_type_and_chat_id
 
 router = APIRouter(prefix='/reports')
 
@@ -14,7 +15,8 @@ def get_report_routes(
         skip: int = Query(default=0, ge=0),
         report_routes: ReportRouteRepository = Depends(dependencies.get_report_routes_repository),
 ):
-    return report_routes.get_all(skip=skip, limit=limit, chat_id=chat_id, report_type_name=report_type)
+    report_routes_from_db = report_routes.get_all(skip=skip, limit=limit, chat_id=chat_id, report_type_name=report_type)
+    return group_report_routes_by_report_type_and_chat_id(report_routes_from_db)
 
 
 @router.post('/')
