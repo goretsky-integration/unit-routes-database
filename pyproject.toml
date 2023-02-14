@@ -7,7 +7,7 @@ authors = ["usbtypec1 <eldos.baktybekov@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.91.0"
-uvicorn = "^0.18.2"
+uvicorn = "^0.20.0"
 sqlalchemy = "^2.0.3"
 psycopg2-binary = "^2.9.5"
 python-dotenv = "^0.21.1"
