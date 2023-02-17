@@ -16,7 +16,6 @@ def on_startup():
 def main():
     uvicorn.run(
         'main:app',
-        debug=app_settings.debug,
         host=app_settings.host,
         port=app_settings.port,
         reload=app_settings.debug,
