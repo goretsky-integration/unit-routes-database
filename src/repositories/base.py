@@ -1,13 +1,9 @@
-from typing import TypeVar, Generic
+from sqlalchemy.orm import sessionmaker
 
-__all__ = (
-    'BaseRepository',
-)
-
-_D = TypeVar('_D')
+__all__ = ('BaseRepository',)
 
 
-class BaseRepository(Generic[_D]):
+class BaseRepository:
 
-    def __init__(self, database: _D):
-        self._database = database
+    def __init__(self, session_factory: sessionmaker):
+        self._session_factory = session_factory

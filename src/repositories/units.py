@@ -1,17 +1,61 @@
+from uuid import UUID
+
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
+
+import exceptions
 import models
+from db.models import Unit, Region
 from repositories.base import BaseRepository
 
-__all__ = (
-    'UnitRepository',
-)
+__all__ = ('UnitRepository',)
 
 
 class UnitRepository(BaseRepository):
 
-    async def get_all(self, limit: int, skip: int) -> list[models.Unit]:
-        query = self._database.find({}).skip(skip).limit(limit)
-        return [models.Unit.parse_obj(unit) async for unit in query]
+    def get_all(
+            self,
+            *,
+            limit: int,
+            skip: int,
+            region_name: str | None = None,
+    ) -> list[models.Unit]:
+        statement = (
+            select(Unit)
+            .join(Unit.region)
+            .limit(limit)
+            .offset(skip)
+            .options(joinedload(Unit.region))
+            .limit(limit).offset(skip)
+        )
+        if region_name is not None:
+            statement = statement.where(Region.name == region_name)
+        with self._session_factory() as session:
+            result = session.execute(statement)
+            units = result.scalars().all()
+        return [
+            models.Unit(
+                id=unit.id,
+                name=unit.name,
+                uuid=unit.uuid,
+                account_name=unit.account_name,
+                region=unit.region.name,
+            ) for unit in units
+        ]
 
-    async def get_by_region(self, region: str, limit: int, skip: int) -> list[models.Unit]:
-        query = self._database.find({'region': region}).skip(skip).limit(limit)
-        return [models.Unit.parse_obj(unit) async for unit in query]
+    def create(
+            self,
+            *,
+            id_: int,
+            name: str,
+            uuid: UUID,
+            account_name: str,
+            region_id: int,
+    ):
+        unit = Unit(id=id_, name=name, uuid=uuid, account_name=account_name, region_id=region_id)
+        try:
+            with self._session_factory() as session, session.begin():
+                session.add(unit)
+        except IntegrityError as error:
+            raise exceptions.AlreadyExistsInDatabase('Unit with this ID/name/UUID already exists')

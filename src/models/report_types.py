@@ -1,18 +1,12 @@
-from pydantic import BaseModel, Field
+from dataclasses import dataclass
 
 __all__ = (
     'ReportType',
-    'StatisticsReportType',
 )
 
 
-class ReportType(BaseModel):
-    id: int = Field(alias='_id')
-    name: str
-    verbose_name: str
-
-
-class StatisticsReportType(BaseModel):
-    id: int = Field(alias='_id')
+@dataclass(frozen=True, slots=True)
+class ReportType:
+    id: int
     name: str
     verbose_name: str
