@@ -21,7 +21,14 @@ class UnitRepository(BaseRepository):
             skip: int,
             region_name: str | None = None,
     ) -> list[models.Unit]:
-        statement = select(Unit).options(joinedload(Unit.region)).limit(limit).offset(skip)
+        statement = (
+            select(Unit)
+            .join(Unit.region)
+            .limit(limit)
+            .offset(skip)
+            .options(joinedload(Unit.region))
+            .limit(limit).offset(skip)
+        )
         if region_name is not None:
             statement = statement.where(Region.name == region_name)
         with self._session_factory() as session:
