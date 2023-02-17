@@ -24,6 +24,8 @@ class ReportRouteRepository(BaseRepository):
     ) -> list[models.ReportRoute]:
         statement = (
             select(ReportRoute)
+            .join(ReportRoute.report_type)
+            .join(ReportRoute.telegram_chat)
             .options(joinedload(ReportRoute.telegram_chat))
             .options(joinedload(ReportRoute.report_type))
             .limit(limit)
