@@ -19,6 +19,14 @@ def get_units(
     return units.get_all(limit=limit, skip=skip, region_name=region)
 
 
+@router.get('/name/{name}/', status_code=status.HTTP_200_OK)
+def get_unit_by_name(
+        name: str,
+        units: UnitRepository = Depends(dependencies.get_units_repository),
+) -> schemas.Unit:
+    return units.get_by_name(name)
+
+
 @router.post('/')
 def create_unit(
         unit: schemas.Unit,
