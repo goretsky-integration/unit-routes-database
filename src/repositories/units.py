@@ -59,3 +59,21 @@ class UnitRepository(BaseRepository):
                 session.add(unit)
         except IntegrityError as error:
             raise exceptions.AlreadyExistsInDatabase('Unit with this ID/name/UUID already exists')
+
+    def get_by_name(self, name: str) -> models.Unit:
+        statement = (
+            select(Unit)
+            .where(Unit.name == name)
+            .options(joinedload(Unit.region))
+        )
+        with self._session_factory() as session:
+            unit: Unit | None = session.scalar(statement)
+        if unit is None:
+            raise exceptions.DoesNotExistInDatabase('Unit by name does not exist')
+        return models.Unit(
+            id=unit.id,
+            name=unit.name,
+            uuid=unit.uuid,
+            account_name=unit.account_name,
+            region=unit.region.name,
+        )
