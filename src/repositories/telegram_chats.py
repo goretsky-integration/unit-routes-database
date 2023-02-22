@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update, delete
 from sqlalchemy.exc import IntegrityError
 
 import exceptions
@@ -35,3 +35,11 @@ class TelegramChatRepository(BaseRepository):
             return self.get_by_chat_id(chat_id=chat_id), False
         except exceptions.DoesNotExistInDatabase:
             return self.create(chat_id=chat_id, title=title), True
+
+    def update_by_chat_id(self, *, chat_id: int, title: str | None = None) -> None:
+        statement = update(TelegramChat).values(title=title).where(TelegramChat.chat_id == chat_id)
+        with self._session_factory() as session:
+            with session.begin():
+                result = session.execute(statement)
+        if result.rowcount == 0:
+            raise exceptions.DoesNotExistInDatabase('Telegram Chat is not found')
