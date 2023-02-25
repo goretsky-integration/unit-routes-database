@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
 import exceptions
@@ -10,6 +10,23 @@ __all__ = ('TelegramChatRepository',)
 
 
 class TelegramChatRepository(BaseRepository):
+
+    def get_all(self, *, limit: int, offset: int) -> list[models.TelegramChat]:
+        statement = (
+            select(TelegramChat)
+            .order_by(TelegramChat.id.asc())
+            .limit(limit)
+            .offset(offset)
+        )
+        with self._session_factory() as session:
+            telegram_chats = session.scalars(statement)
+            return [
+                models.TelegramChat(
+                    id=telegram_chat.id,
+                    chat_id=telegram_chat.chat_id,
+                    title=telegram_chat.title,
+                ) for telegram_chat in telegram_chats
+            ]
 
     def get_by_chat_id(self, *, chat_id: int) -> models.TelegramChat:
         statement = select(TelegramChat).where(TelegramChat.chat_id == chat_id)
