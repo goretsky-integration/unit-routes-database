@@ -38,7 +38,8 @@ def create_unit(
         id_=unit.id,
         name=unit.name,
         uuid=unit.uuid,
-        account_name=unit.account_name,
+        office_manager_account_name=unit.office_manager_account_name,
+        dodo_is_api_account_name=unit.dodo_is_api_account_name,
         region_id=region.id,
     )
     return Response(status_code=status.HTTP_201_CREATED)
