@@ -92,9 +92,3 @@ class ReportRouteRepository(BaseRepository):
         is_deleted = result.rowcount > 0
         if not is_deleted:
             raise exceptions.DoesNotExistInDatabase('Report route is not found')
-
-    async def get_chat_ids_and_unit_ids_by_report_type(
-            self, report_type: str,
-    ) -> list[models.ReportChatIdAndUnitIds]:
-        query = self._database.find({'report_type': report_type}, {'report_type': 0, '_id': 0})
-        return [models.ReportChatIdAndUnitIds.parse_obj(report) async for report in query]
