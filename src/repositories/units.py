@@ -39,7 +39,8 @@ class UnitRepository(BaseRepository):
                 id=unit.id,
                 name=unit.name,
                 uuid=unit.uuid,
-                account_name=unit.account_name,
+                office_manager_account_name=unit.office_manager_account_name,
+                dodo_is_api_account_name=unit.dodo_is_api_account_name,
                 region=unit.region.name,
             ) for unit in units
         ]
@@ -50,10 +51,18 @@ class UnitRepository(BaseRepository):
             id_: int,
             name: str,
             uuid: UUID,
-            account_name: str,
+            office_manager_account_name: str,
+            dodo_is_api_account_name: str,
             region_id: int,
     ):
-        unit = Unit(id=id_, name=name, uuid=uuid, account_name=account_name, region_id=region_id)
+        unit = Unit(
+            id=id_,
+            name=name,
+            uuid=uuid,
+            office_manager_account_name=office_manager_account_name,
+            dodo_is_api_account_name=dodo_is_api_account_name,
+            region_id=region_id,
+        )
         try:
             with self._session_factory() as session, session.begin():
                 session.add(unit)
@@ -74,6 +83,7 @@ class UnitRepository(BaseRepository):
             id=unit.id,
             name=unit.name,
             uuid=unit.uuid,
-            account_name=unit.account_name,
+            office_manager_account_name=unit.office_manager_account_name,
+            dodo_is_api_account_name=unit.dodo_is_api_account_name,
             region=unit.region.name,
         )
