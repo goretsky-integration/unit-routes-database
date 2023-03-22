@@ -93,8 +93,19 @@ class ReportRouteRepository(BaseRepository):
         if not is_deleted:
             raise exceptions.DoesNotExistInDatabase('Report route is not found')
 
-    async def get_chat_ids_and_unit_ids_by_report_type(
-            self, report_type: str,
-    ) -> list[models.ReportChatIdAndUnitIds]:
-        query = self._database.find({'report_type': report_type}, {'report_type': 0, '_id': 0})
-        return [models.ReportChatIdAndUnitIds.parse_obj(report) async for report in query]
+    def get_telegram_chat_ids(
+            self,
+            *,
+            report_type_name: str,
+            unit_id: int,
+    ) -> list[int]:
+        statement = (
+            select(TelegramChat.chat_id)
+            .join(ReportRoute.report_type)
+            .join(ReportRoute.telegram_chat)
+            .distinct()
+            .where(ReportType.name == report_type_name,
+                   ReportRoute.unit_id == unit_id)
+        )
+        with self._session_factory() as session:
+            return [row[0] for row in session.execute(statement).all()]
