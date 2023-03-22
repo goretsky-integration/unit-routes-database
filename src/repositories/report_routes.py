@@ -92,3 +92,20 @@ class ReportRouteRepository(BaseRepository):
         is_deleted = result.rowcount > 0
         if not is_deleted:
             raise exceptions.DoesNotExistInDatabase('Report route is not found')
+
+    def get_telegram_chat_ids(
+            self,
+            *,
+            report_type_name: str,
+            unit_id: int,
+    ) -> list[int]:
+        statement = (
+            select(TelegramChat.chat_id)
+            .join(ReportRoute.report_type)
+            .join(ReportRoute.telegram_chat)
+            .distinct()
+            .where(ReportType.name == report_type_name,
+                   ReportRoute.unit_id == unit_id)
+        )
+        with self._session_factory() as session:
+            return [row[0] for row in session.execute(statement).all()]
