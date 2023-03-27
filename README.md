@@ -1,62 +1,106 @@
 # Unit's routes Database
 
-Сервис хранит информацию о всех подключенных юнитах, 
+Сервис хранит информацию о всех подключенных юнитах,
 а также информацию о маршрутах отчетов/уведомлений.
 
 ---
 
 ### Терминология:
+
 - Unit - точка продаж/пиццерия.
 - Chat ID - уникальный идентификатор чата в Telegram.
 - Маршрут - связка chat ID, юнита и типа отчета.
 
 ---
 
-#### Схема таблиц в БД:
-![Database schema](./docs/img/database-schema.jpg)
+## API Reference
+
+- [Units](#units)
+    - [Get units list](#get-all-units)
+    - [Get unit by name](#get-unit-by-name)
+    - [Get regions list](#get-all-regions)
+
+### Units
+
+#### Get all units
+
+```http request
+  GET /units/
+```
+
+| Query Parameter | Type  | Description                  |
+|:----------------|:------|:-----------------------------|
+| `limit`         | `int` | **Optional**. Default is 100 |
+| `offset`        | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "units": [
+    {
+      "id": 1,
+      "name": "Москва 1-1",
+      "uuid": "b8e7c2a9-563f-4011-b531-3974efc36a48",
+      "office_manager_account_name": "om_account_msk_1",
+      "dodo_is_api_account_name": "api_account_msk_1",
+      "region": "Москва 1"
+    }
+  ],
+  "is_end_of_list_reached": true
+}
+```
 
 ---
 
-### Зависимости:
-- fastapi + uvicorn
-- sqlalchemy + psycopg2
-- python-dotenv
-- БД Postgresql
+#### Get unit by name
+
+```http request
+  GET /units/name/${unit_name}/
+```
+
+| Path Parameter | Type     | Description             |
+|:---------------|:---------|:------------------------|
+| `unit_name`    | `string` | **Required**. Unit name |
+
+#### Response
+
+```json
+{
+  "id": 1,
+  "name": "Москва 1-1",
+  "uuid": "b8e7c2a9-563f-4011-b531-3974efc36a48",
+  "office_manager_account_name": "om_account_msk_1",
+  "dodo_is_api_account_name": "api_account_msk_1",
+  "region": "Москва 1"
+}
+```
 
 ---
 
-### Конфигурация:
-Создайте файл `.env` в корне проекта.
-Необходимы следующие переменные окружения:
-- APP_HOST - хост приложения. Обычно `127.0.0.1`.
-- APP_PORT - порт приложения.
-- DEBUG - режим отладки, `true`/`false`.
-- DATABASE_URL - URL БД Postgres'а. 
+#### Get all regions
+
+```http request
+  GET /units/regions/
+```
+
+| Query Parameter | Type  | Description                  |
+|:----------------|:------|:-----------------------------|
+| `limit`         | `int` | **Optional**. Default is 100 |
+| `offset`        | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "regions": [
+    {
+      "id": 1,
+      "name": "Москва 1"
+    }
+  ],
+  "is_end_of_list_reached": true
+}
+```
 
 ---
-
-### Установка и запуск:
-Создание виртуального окружения:
-```shell
-poetry env use python3.11
-```
-
-Активация виртуального окружения:
-```shell
-poetry shell
-```
-
-Установка зависимостей:
-```shell
-poetry install --without dev
-```
-
-Запуск можно произвести двумя путями:
-```shell
-python src/main.py
-```
-или
-```shell
-# в директории src
-uvicorn main:app --host=Ваш хост --port=Ваш порт
-```
