@@ -21,7 +21,3 @@ def get_unit_by_id(unit_id: int) -> Unit:
         return Unit.objects.get(id=unit_id)
     except Unit.DoesNotExist:
         raise NotFoundError('Unit by ID is not found')
-
-
-def get_region_names() -> list[str]:
-    return get_regions().values_list('name', flat=True)
