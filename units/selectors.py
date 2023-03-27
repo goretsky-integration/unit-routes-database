@@ -4,8 +4,8 @@ from core.exceptions import NotFoundError
 from units.models import Region, Unit
 
 
-def get_regions() -> QuerySet[Region]:
-    return Region.objects.all()
+def get_regions(*, limit: int, offset: int) -> QuerySet[Region]:
+    return Region.objects.all()[offset:offset + limit]
 
 
 def get_units(*, limit: int, offset: int) -> QuerySet[Unit]:
