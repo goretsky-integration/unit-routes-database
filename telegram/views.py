@@ -70,13 +70,15 @@ class TelegramChatByChatIdApi(APIView):
         )
 
     class OutputSerializer(serializers.ModelSerializer):
+        type = serializers.CharField(source='get_type_display')
+
         class Meta:
             model = TelegramChat
             fields = ('chat_id', 'username', 'title', 'type')
 
     def get(self, request: Request, chat_id: int):
-        telegram_chat = get_telegram_chats_by_chat_id(chat_id)
-        response_data = self.OutputSerializer(telegram_chat).data
+        telegram_chat = get_telegram_chats_by_chat_id(chat_id).first()
+        response_data = self.OutputSerializer(instance=telegram_chat).data
         return Response(response_data)
 
     def put(self, request: Request, chat_id: int):
