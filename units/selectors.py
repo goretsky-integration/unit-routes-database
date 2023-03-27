@@ -13,7 +13,10 @@ def get_units(*, limit: int, offset: int) -> QuerySet[Unit]:
 
 
 def get_unit_by_name(name: str) -> Unit:
-    return Unit.objects.select_related('region').filter(name=name).first()
+    try:
+        return Unit.objects.select_related('region').get(name=name)
+    except Unit.DoesNotExist:
+        raise NotFoundError('Unit by name is not found')
 
 
 def get_unit_by_id(unit_id: int) -> Unit:
