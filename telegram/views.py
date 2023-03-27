@@ -29,19 +29,17 @@ class TelegramChatsCreateListApi(APIView):
         )
 
     def get(self, request: Request):
-        limit = request.query_params.get('limit', 100)
-        offset = request.query_params.get('offset', 0)
+        limit = int(request.query_params.get('limit', 100))
+        offset = int(request.query_params.get('offset', 0))
 
         telegram_chats = get_telegram_chats(limit=limit, offset=offset)
-        telegram_chats_next_page = get_telegram_chats(
-            limit=1,
-            offset=offset + limit,
-        )
-        is_end_of_list_reached = not telegram_chats_next_page.exists()
+        is_next_page_exists = get_telegram_chats(
+            limit=1, offset=offset + limit,
+        ).exists()
 
         response_data = {
             'telegram_chats': telegram_chats.values('title', 'chat_id'),
-            'is_end_of_list_reached': is_end_of_list_reached,
+            'is_end_of_list_reached': not is_next_page_exists,
         }
         return Response(response_data)
 
