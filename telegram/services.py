@@ -1,3 +1,6 @@
+from django.db.utils import IntegrityError
+
+from core.exceptions import AlreadyExistsError
 from telegram.models import TelegramChat
 from telegram.selectors import get_telegram_chats_by_chat_id
 
@@ -19,9 +22,12 @@ def create_telegram_chat(
         username: str | None,
         chat_type: TelegramChat.ChatType,
 ) -> TelegramChat:
-    return TelegramChat.objects.create(
-        chat_id=chat_id,
-        title=title,
-        username=username,
-        type=chat_type,
-    )
+    try:
+        return TelegramChat.objects.create(
+            chat_id=chat_id,
+            title=title,
+            username=username,
+            type=chat_type,
+        )
+    except IntegrityError:
+        raise AlreadyExistsError('Chat with provided chat ID already exists')
