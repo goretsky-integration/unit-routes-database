@@ -8,6 +8,12 @@ from telegram.selectors import get_telegram_chats, get_telegram_chats_by_chat_id
 from telegram.services import update_telegram_chat, create_telegram_chat
 
 
+class TelegramChatTypesListApi(APIView):
+
+    def get(self, request: Request):
+        return Response(TelegramChat.ChatType.names)
+
+
 class TelegramChatsCreateListApi(APIView):
 
     class InputSerializer(serializers.Serializer):
