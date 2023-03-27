@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'units.apps.UnitsConfig',
     'telegram.apps.TelegramConfig',
     'reports.apps.ReportsConfig',
+    'scopes.apps.ScopesConfig',
 ]
 
 MIDDLEWARE = [
@@ -98,3 +99,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'core.views.exception_handler',
 }
+
+if DEBUG:
+    INSTALLED_APPS.append('silk')
+    MIDDLEWARE.append('silk.middleware.SilkyMiddleware')
