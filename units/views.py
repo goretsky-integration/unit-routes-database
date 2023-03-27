@@ -24,17 +24,21 @@ class UnitsListApi(APIView):
     def get(self, request):
         limit = int(request.query_params.get('limit', 100))
         offset = int(request.query_params.get('skip', 0))
-        units = get_units(limit=limit, offset=offset)
+        units = (
+            get_units(limit=limit, offset=offset)
+            .values('id', 'name', 'uuid', 'office_manager_account_name',
+                    'dodo_is_api_account_name', 'region__name')
+        )
         is_next_page_exists = get_units(limit=1, offset=limit + offset).exists()
         response_data = {
             'units': [
                 {
-                    'id': unit.id,
-                    'name': unit.name,
-                    'uuid': unit.uuid,
-                    'office_manager_account_name': unit.office_manager_account_name,
-                    'dodo_is_api_account_name': unit.dodo_is_api_account_name,
-                    'region': unit.region.name,
+                    'id': unit['id'],
+                    'name': unit['name'],
+                    'uuid': unit['uuid'],
+                    'office_manager_account_name': unit['office_manager_account_name'],
+                    'dodo_is_api_account_name': unit['dodo_is_api_account_name'],
+                    'region': unit['region__name'],
                 } for unit in units
             ],
             'is_end_of_list_reached': not is_next_page_exists,
