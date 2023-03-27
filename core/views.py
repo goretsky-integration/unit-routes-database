@@ -14,7 +14,7 @@ def exception_handler(exc, context):
     """
     match exc:
         case NotFoundError():
-            exc = drf_api_exceptions.NotFound
+            exc = drf_api_exceptions.NotFound(str(exc))
         case ApplicationError():
             exc = drf_api_exceptions.APIException
     response = default_exception_handler(exc, context)
