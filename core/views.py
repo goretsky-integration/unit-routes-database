@@ -1,7 +1,7 @@
-from rest_framework import exceptions as drf_api_exceptions
+from rest_framework import exceptions as drf_api_exceptions, status
 from rest_framework.views import exception_handler as default_exception_handler
 
-from core.exceptions import ApplicationError, NotFoundError
+from core.exceptions import ApplicationError, NotFoundError, AlreadyExistsError
 
 
 def exception_handler(exc, context):
@@ -13,6 +13,9 @@ def exception_handler(exc, context):
     }
     """
     match exc:
+        case AlreadyExistsError():
+            exc = drf_api_exceptions.APIException(str(exc))
+            exc.status_code = status.HTTP_409_CONFLICT
         case NotFoundError():
             exc = drf_api_exceptions.NotFound(str(exc))
         case ApplicationError():

@@ -4,3 +4,7 @@ class ApplicationError(Exception):
 
 class NotFoundError(ApplicationError):
     pass
+
+
+class AlreadyExistsError(ApplicationError):
+    pass
