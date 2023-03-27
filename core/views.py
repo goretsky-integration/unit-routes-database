@@ -1,7 +1,12 @@
 from rest_framework import exceptions as drf_api_exceptions, status
 from rest_framework.views import exception_handler as default_exception_handler
 
-from core.exceptions import ApplicationError, NotFoundError, AlreadyExistsError
+from core.exceptions import (
+    ApplicationError,
+    NotFoundError,
+    AlreadyExistsError,
+    PermissionDeniedError,
+)
 
 
 def exception_handler(exc, context):
@@ -13,6 +18,8 @@ def exception_handler(exc, context):
     }
     """
     match exc:
+        case PermissionDeniedError():
+            exc = drf_api_exceptions.PermissionDenied(str(exc))
         case AlreadyExistsError():
             exc = drf_api_exceptions.APIException(str(exc))
             exc.status_code = status.HTTP_409_CONFLICT

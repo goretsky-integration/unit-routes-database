@@ -8,3 +8,7 @@ class NotFoundError(ApplicationError):
 
 class AlreadyExistsError(ApplicationError):
     pass
+
+
+class PermissionDeniedError(ApplicationError):
+    pass
