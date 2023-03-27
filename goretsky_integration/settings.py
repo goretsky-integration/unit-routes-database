@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'units.apps.UnitsConfig',
     'telegram.apps.TelegramConfig',
+    'reports.apps.ReportsConfig',
 ]
 
 MIDDLEWARE = [
