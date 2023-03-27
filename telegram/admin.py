@@ -5,4 +5,4 @@ from telegram.models import TelegramChat
 
 @admin.register(TelegramChat)
 class TelegramChatAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('type',)
