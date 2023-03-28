@@ -38,6 +38,10 @@ def deactivate(modeladmin, request, queryset):
 class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
     actions = (activate, deactivate)
 
+    def get_readonly_fields(self, request, obj=None):
+        if settings.DEBUG:
+            return ['id']
+
     def get_actions(self, request):
         actions = super().get_actions(request)
         if not settings.DEBUG:
