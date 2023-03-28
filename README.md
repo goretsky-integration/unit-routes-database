@@ -25,6 +25,9 @@
     - [Get chat types](#get-all-chat-types)
     - [Get Telegram chat detail](#get-telegram-chat)
     - [Update Telegram chat](#update-telegram-chat)
+- [Report types](#report-types)
+    - [Get report types](#get-all-report-types)
+    - [Get statistics report types](#get-all-statistics-report-types)
 
 ### Units
 
@@ -227,5 +230,63 @@ PUT /telegram-chats/${chat_id}/
 - 204 - Updated.
 - 400 - Invalid request.
 - 404 - Chat not found.
+
+---
+
+### Report types
+
+#### Get all report types
+
+```http request
+GET /report-types/
+```
+
+| Query Parameter | Type  | Description                  |
+|:----------------|:------|:-----------------------------|
+| `limit`         | `int` | **Optional**. Default is 100 |
+| `offset`        | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "report_types": [
+    {
+      "id": 16,
+      "name": "CANCELED_ORDERS",
+      "verbose_name": "Отмены заказов"
+    }
+  ],
+  "is_end_of_list_reached": false
+}
+```
+
+---
+
+#### Get all statistics report types
+
+```http request
+GET /report-types/statistics/
+```
+
+| Query Parameter | Type  | Description                  |
+|:----------------|:------|:-----------------------------|
+| `limit`         | `int` | **Optional**. Default is 100 |
+| `offset`        | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "report_types": [
+    {
+      "id": 777,
+      "name": "BONUS_SYSTEM",
+      "verbose_name": "Бонусная система"
+    }
+  ],
+  "is_end_of_list_reached": true
+}
+```
 
 ---
