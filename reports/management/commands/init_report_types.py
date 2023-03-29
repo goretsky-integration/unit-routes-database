@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from reports.models import ReportType
+from reports.models.report_types import ReportType
 from reports.selectors import get_report_types
 
 all_report_types = [
