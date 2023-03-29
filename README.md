@@ -33,6 +33,11 @@
     - [Get report routes Telegram chats](#get-report-routes-telegram-chats)
     - [Create report route](#create-report-route)
     - [Delete report route](#delete-report-type)
+- [Roles](#roles)
+    - [Get user roles units](#get-user-role-units)
+    - [Get user roles regions](#get-user-role-regions)
+    - [Get user roles report types](#get-user-role-report-types)
+    - [Set user role](#set-user-role)
 
 ### Units
 
@@ -399,3 +404,111 @@ DELETE /report-routes/
 #### Response status codes
 
 - 204 - Deleted
+
+---
+
+### Roles
+
+#### Get user role regions
+
+```http request
+GET /users/{$chat_id}/regions/
+```
+
+| Query Parameter | Type  | Description                  |
+|:----------------|:------|:-----------------------------|
+| `limit`         | `int` | **Optional**. Default is 100 |
+| `offset`        | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "regions": [
+    {
+      "id": 1,
+      "name": "Москва 1"
+    }
+  ],
+  "is_end_of_list_reached": true
+}
+```
+
+---
+
+#### Get user role units
+
+```http request
+GET /users/{$chat_id}/units/
+```
+
+| Query Parameter | Type  | Description                  |
+|:----------------|:------|:-----------------------------|
+| `limit`         | `int` | **Optional**. Default is 100 |
+| `offset`        | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "units": [
+    {
+      "id": 1,
+      "name": "Москва 1-1",
+      "uuid": "000d3a00-b0dc-80d9-11e6-b24faa1bca9f"
+    }
+  ],
+  "is_end_of_list_reached": true
+}
+```
+
+---
+
+#### Get user role report types
+
+```http request
+GET /users/{$chat_id}/report-types/
+```
+
+| Query Parameter | Type  | Description                  |
+|:----------------|:------|:-----------------------------|
+| `limit`         | `int` | **Optional**. Default is 100 |
+| `offset`        | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "report_types": [
+    {
+      "id": 1,
+      "name": "CANCELED_ORDERS",
+      "verbose_name": "Отмены заказов"
+    }
+  ],
+  "is_end_of_list_reached": true
+}
+```
+
+---
+
+#### Set user role
+
+```http request
+PATCH /users/{$chat_id}/access-code/
+```
+
+#### Body
+
+```json
+{
+  "access_code": "your access code"
+}
+```
+
+#### Response status codes
+
+- 204 - Updated
+- 404 - User/role is not found
+
+---
