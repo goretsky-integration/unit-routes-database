@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'units.apps.UnitsConfig',
     'telegram.apps.TelegramConfig',
     'reports.apps.ReportsConfig',
-    'scopes.apps.ScopesConfig',
+    'user_roles.apps.UserRolesConfig',
 ]
 
 MIDDLEWARE = [
