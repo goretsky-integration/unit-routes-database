@@ -1,8 +1,9 @@
 from django.urls import path
 
 from reports.views.report_routes import (
-    TelegramChatIdsListApi,
-    ReportRoutesCreateDeleteListApi
+    ReportRoutesChatIdsListApi,
+    ReportRoutesCreateDeleteApi,
+    ReportRoutesUnitsListApi,
 )
 from reports.views.report_types import (
     ReportTypesListApi,
@@ -12,6 +13,7 @@ from reports.views.report_types import (
 urlpatterns = [
     path('report-types/', ReportTypesListApi.as_view()),
     path('report-types/statistics/', StatisticsReportTypesListApi.as_view()),
-    path('reports/', ReportRoutesCreateDeleteListApi.as_view()),
-    path('reports/telegram-chats/', TelegramChatIdsListApi.as_view()),
+    path('report-routes/', ReportRoutesCreateDeleteApi.as_view()),
+    path('report-routes/units/', ReportRoutesUnitsListApi.as_view()),
+    path('report-routes/telegram-chats/', ReportRoutesChatIdsListApi.as_view()),
 ]
