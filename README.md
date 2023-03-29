@@ -28,6 +28,11 @@
 - [Report types](#report-types)
     - [Get report types](#get-all-report-types)
     - [Get statistics report types](#get-all-statistics-report-types)
+- [Report routes](#report-routes)
+    - [Get report routes units](#get-report-routes-units)
+    - [Get report routes Telegram chats](#get-report-routes-telegram-chats)
+    - [Create report route](#create-report-route)
+    - [Delete report route](#delete-report-type)
 
 ### Units
 
@@ -290,3 +295,107 @@ GET /report-types/statistics/
 ```
 
 ---
+
+### Report routes
+
+#### Get report routes units
+
+```http request
+GET /report-routes/units/
+```
+
+| Query Parameter  | Type  | Description                  |
+|:-----------------|:------|:-----------------------------|
+| `chat_id`        | `int` | Telegram chat ID             |
+| `report_type_id` | `int` | Report type ID               |
+| `limit`          | `int` | **Optional**. Default is 100 |
+| `offset`         | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "unit_ids": [
+    1,
+    2,
+    3
+  ],
+  "is_end_of_list_reached": true
+}
+```
+
+---
+
+#### Get report routes telegram chats
+
+```http request
+GET /report-routes/telegram-chats/
+```
+
+| Query Parameter  | Type  | Description                  |
+|:-----------------|:------|:-----------------------------|
+| `unit_id`        | `int` | Unit ID                      |
+| `report_type_id` | `int` | Report type ID               |
+| `limit`          | `int` | **Optional**. Default is 100 |
+| `offset`         | `int` | **Optional**. Default is 0   |
+
+#### Response
+
+```json
+{
+  "chat_ids": [
+    1,
+    2,
+    3
+  ],
+  "is_end_of_list_reached": true
+}
+```
+
+---
+
+#### Create report route
+
+```http request
+POST /report-routes/
+```
+
+#### Body
+
+```json
+{
+  "report_type_id": 0,
+  "chat_id": 0,
+  "unit_ids": [
+    1,
+    2,
+    3
+  ]
+}
+```
+
+#### Response status codes
+
+- 201 - Created
+- 400 - Bad request
+- 403 - Permission to units/report type denied
+- 404 - Chat/report type/units do not exist
+- 409 - Report type already exists
+
+---
+
+#### Delete report type
+
+```http request
+DELETE /report-routes/
+```
+
+| Query Parameter  | Type        | Description      |
+|:-----------------|:------------|:-----------------|
+| `chat_id`        | `int`       | Chat ID          |
+| `report_type_id` | `int`       | Report type ID   |
+| `unit_ids`       | `list[int]` | List of unit IDs |
+
+#### Response status codes
+
+- 204 - Deleted
