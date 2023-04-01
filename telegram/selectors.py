@@ -15,7 +15,7 @@ def get_telegram_chats_by_chat_id(chat_id: int) -> QuerySet[TelegramChat]:
 def get_telegram_chat_with_scope_by_chat_id(chat_id: int) -> TelegramChat:
     telegram_chats = (
         get_telegram_chats_by_chat_id(chat_id)
-        .select_related('report_scope')
+        .select_related('role')
     )
     if (telegram_chat := telegram_chats.first()) is None:
         raise NotFoundError('Chat by chat ID is not found')
