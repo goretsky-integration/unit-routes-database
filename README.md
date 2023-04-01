@@ -442,10 +442,11 @@ GET /users/{$chat_id}/regions/
 GET /users/{$chat_id}/units/
 ```
 
-| Query Parameter | Type  | Description                  |
-|:----------------|:------|:-----------------------------|
-| `limit`         | `int` | **Optional**. Default is 100 |
-| `offset`        | `int` | **Optional**. Default is 0   |
+| Query Parameter | Type  | Description                       |
+|:----------------|:------|:----------------------------------|
+| `limit`         | `int` | **Optional**. Default is 100      |
+| `offset`        | `int` | **Optional**. Default is 0        |
+| `region_id`     | `int` | **Optional**. Filter by region ID |
 
 #### Response
 

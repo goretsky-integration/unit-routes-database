@@ -11,7 +11,7 @@ user_roles_urlpatterns = [
     path('regions/', UserRoleRegionsListApi.as_view()),
     path('report-types/', UserRoleReportTypesListApi.as_view()),
     path('units/', UserRoleUnitsListApi.as_view()),
-    path('access-code/', SetUserRoleApi.as_view()),
+    path('', SetUserRoleApi.as_view()),
 
 ]
 

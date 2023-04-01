@@ -33,15 +33,21 @@ class UserRoleUnitsListApi(APIView):
     def get(self, request: Request, chat_id: int):
         limit = int(request.query_params.get('limit', 100))
         offset = int(request.query_params.get('offset', 0))
+        region_id = request.query_params.get('region_id')
+        if region_id is not None:
+            region_id = int(region_id)
 
         chat = get_telegram_chat_by_chat_id(chat_id)
         if chat.role is None:
             raise PermissionDeniedError('User has no any role')
 
+        units = chat.role.units
+        if region_id is not None:
+            units = units.filter(region_id=region_id)
         units = (
-            chat.role.units
-            .order_by('id')[offset:limit + 1 + offset]
-            .values('id', 'name', 'uuid')
+            units.order_by('id')[offset:limit + 1 + offset]
+            .values('id', 'name', 'uuid', 'region_id',
+                    'office_manager_account_name', 'dodo_is_api_account_name')
         )
         is_next_page_exists = len(units) == limit + 1
         if is_next_page_exists:
