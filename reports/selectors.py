@@ -9,6 +9,13 @@ def get_report_types() -> QuerySet[ReportType]:
     return ReportType.objects.all()
 
 
+def get_report_type_by_name(name: str) -> ReportType:
+    try:
+        return ReportType.objects.get(name=name, is_active=True)
+    except ReportType.DoesNotExist:
+        raise NotFoundError('Report type is not found')
+
+
 def filter_active_report_types(
         queryset: QuerySet[ReportType],
 ) -> QuerySet[ReportType]:
