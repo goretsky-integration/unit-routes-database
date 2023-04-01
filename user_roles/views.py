@@ -46,7 +46,8 @@ class UserRoleUnitsListApi(APIView):
             units = units.filter(region_id=region_id)
         units = (
             units.order_by('id')[offset:limit + 1 + offset]
-            .values('id', 'name', 'uuid', 'region_id')
+            .values('id', 'name', 'uuid', 'region_id',
+                    'office_manager_account_name', 'dodo_is_api_account_name')
         )
         is_next_page_exists = len(units) == limit + 1
         if is_next_page_exists:
