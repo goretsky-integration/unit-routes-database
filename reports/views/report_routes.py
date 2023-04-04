@@ -10,7 +10,10 @@ from reports.selectors import (
     get_report_type_by_id,
 )
 from reports.services import create_report_routes, delete_report_routes
-from telegram.selectors import get_telegram_chat_with_scope_by_chat_id
+from telegram.selectors import (
+    get_telegram_chat_with_scope_by_chat_id,
+    get_telegram_chat_by_chat_id
+)
 
 
 class ReportRoutesUnitsListApi(APIView):
@@ -78,6 +81,7 @@ class ReportRoutesCreateDeleteApi(APIView):
 
     class InputSerializer(serializers.Serializer):
         report_type_id = serializers.IntegerField()
+        user_chat_id = serializers.IntegerField()
         chat_id = serializers.IntegerField()
         unit_ids = serializers.ListSerializer(
             child=serializers.IntegerField(),
@@ -88,18 +92,19 @@ class ReportRoutesCreateDeleteApi(APIView):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
+        user_chat_id = serialized_data['user_chat_id']
         chat_id = serialized_data['chat_id']
         report_type_id = serialized_data['report_type_id']
         requested_unit_ids: set[int] = set(serialized_data['unit_ids'])
 
-        telegram_chat = get_telegram_chat_with_scope_by_chat_id(chat_id)
-        if telegram_chat.role is None:
+        user = get_telegram_chat_with_scope_by_chat_id(user_chat_id)
+        if user.role is None:
             raise PermissionDeniedError('User has no any role')
 
         report_type = get_report_type_by_id(report_type_id)
 
-        report_types_with_access = telegram_chat.role.report_types
-        units_with_access = telegram_chat.role.units
+        report_types_with_access = user.role.report_types
+        units_with_access = user.role.units
 
         has_report_type_access = report_types_with_access.contains(report_type)
         if not has_report_type_access:
@@ -119,16 +124,17 @@ class ReportRoutesCreateDeleteApi(APIView):
                 f'Permission to units {permission_denied_units} denied'
             )
 
+        chat = get_telegram_chat_by_chat_id(chat_id)
         create_report_routes(
-            telegram_chat_id=telegram_chat.id,
+            telegram_chat_id=chat.id,
             report_type_id=report_type.id,
             unit_ids=requested_unit_ids_with_access,
         )
         return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request: Request):
-        chat_id = request.query_params['chat_id']
-        report_type_id = request.query_params['report_type_id']
+        chat_id = int(request.query_params['chat_id'])
+        report_type_id = int(request.query_params['report_type_id'])
         unit_ids = tuple(map(int, request.query_params.getlist('unit_ids')))
 
         delete_report_routes(
