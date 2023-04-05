@@ -87,7 +87,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = env.str('LANGUAGE_CODE')
 
 TIME_ZONE = 'UTC'
 
@@ -97,8 +97,8 @@ USE_L10N = True
 USE_TZ = True
 
 LANGUAGES = (
-    ('en', _('settings|languages|en')),
     ('ru', _('settings|languages|ru')),
+    ('en', _('settings|languages|en')),
 )
 
 STATIC_URL = 'static/'
