@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
+from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
 from core.mixins import OnlyDebugAddChangeDeleteMixin
@@ -9,13 +10,19 @@ from reports.models.report_types import ReportType
 
 
 class CategoryParentListFilter(SimpleListFilter):
-    title = _('Report types')
+    title = capfirst(_('reports|admin|filter|title'))
     parameter_name = 'report_type_without_parent'
 
     def lookups(self, request, model_admin):
         return (
-            ('report_types', _('Report types')),
-            ('statistics_report_types', _('Statistics report types')),
+            (
+                'report_types',
+                capfirst(_('reports|admin|filter|report_type')),
+            ),
+            (
+                'statistics_report_types',
+                capfirst(_('reports|admin|filter|statistics_report_type')),
+            ),
         )
 
     def queryset(self, request, queryset):
@@ -38,13 +45,9 @@ def deactivate(modeladmin, request, queryset):
 class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
     actions = (activate, deactivate)
 
-    def get_readonly_fields(self, request, obj=None):
-        if settings.DEBUG:
-            return ['id']
-
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if not settings.DEBUG:
+        if settings.DEBUG:
             del actions['activate']
             del actions['deactivate']
         return actions
@@ -57,9 +60,10 @@ class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
 
     def get_exclude(self, request, obj=None):
         if not settings.DEBUG:
-            return 'parent', 'is_active'
+            return 'is_active', 'name', 'id'
 
 
 @admin.register(ReportRoute)
 class ReportRouteAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('telegram_chat', 'unit', 'report_type')
+    list_select_related = ('telegram_chat', 'unit', 'report_type')

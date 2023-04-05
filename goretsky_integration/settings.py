@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from django.utils.translation import gettext_lazy as _
 from environ import Env
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,6 +33,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -85,13 +87,19 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = env.str('LANGUAGE_CODE')
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
+USE_L10N = True
 
 USE_TZ = True
+
+LANGUAGES = (
+    ('ru', _('settings|languages|ru')),
+    ('en', _('settings|languages|en')),
+)
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
@@ -101,6 +109,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'core.views.exception_handler',
 }
+
+LOCALE_PATHS = [
+    Path.joinpath(BASE_DIR / 'locale'),
+]
 
 if DEBUG:
     INSTALLED_APPS.append('silk')
