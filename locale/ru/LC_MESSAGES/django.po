@@ -1,0 +1,213 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-04-05 23:51+0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: goretsky_integration/settings.py:100
+msgid "settings|languages|en"
+msgstr "английский"
+
+#: goretsky_integration/settings.py:101
+msgid "settings|languages|ru"
+msgstr "русский"
+
+#: reports/admin.py:13
+msgid "reports|admin|filter|title"
+msgstr "виды отчётов"
+
+#: reports/admin.py:20
+msgid "reports|admin|filter|report_type"
+msgstr "отчёт"
+
+#: reports/admin.py:24
+msgid "reports|admin|filter|statistics_report_type"
+msgstr "статистика"
+
+#: reports/apps.py:8
+msgid "reports|app"
+msgstr "отчёты"
+
+#: reports/models/report_routes.py:13
+msgid "reports|model|report_route|report_type"
+msgstr "вид отчёта"
+
+#: reports/models/report_routes.py:18
+msgid "reports|model|report_route|unit"
+msgstr "точка продаж"
+
+#: reports/models/report_routes.py:23
+msgid "reports|model|report_route|telegram chat"
+msgstr "Telegram чат"
+
+#: reports/models/report_routes.py:27
+msgid "reports|model|report_route"
+msgstr "маршрут отчёта"
+
+#: reports/models/report_routes.py:28
+msgid "reports|model|report_routes"
+msgstr "маршруты отчётов"
+
+#: reports/models/report_types.py:11
+msgid "reports|model|report_type|name"
+msgstr "название отчёта"
+
+#: reports/models/report_types.py:15
+msgid "reports|model|report_type|verbose_name"
+msgstr "название отчёта"
+
+#: reports/models/report_types.py:22
+msgid "reports|model|report_type|parent"
+msgstr "родительская категория отчёта"
+
+#: reports/models/report_types.py:26
+msgid "reports|model|report_type|is_active"
+msgstr "активен"
+
+#: reports/models/report_types.py:33
+msgid "reports|model|report_type"
+msgstr "вид отчёта"
+
+#: reports/models/report_types.py:34
+msgid "reports|model|report_types"
+msgstr "виды отчётов"
+
+#: telegram/admin.py:16
+msgid "telegram|admin|telegram_chat|search_help_text"
+msgstr "поиск по имени пользователя, нику, ID чата"
+
+#: telegram/apps.py:8
+msgid "telegram|app"
+msgstr "Telegram"
+
+#: telegram/models.py:12
+msgid "telegram|model|telegram_chat|chat_type|private"
+msgstr "личный"
+
+#: telegram/models.py:16
+msgid "telegram|model|telegram_chat|chat_type|group"
+msgstr "групповой"
+
+#: telegram/models.py:22
+msgid "telegram|model|telegram_chat|chat_id"
+msgstr "ID чата"
+
+#: telegram/models.py:28
+msgid "telegram|model|telegram_chat|username"
+msgstr "ник"
+
+#: telegram/models.py:32
+msgid "telegram|model|telegram_chat|title"
+msgstr "имя"
+
+#: telegram/models.py:36
+msgid "telegram|model|telegram_chat|type"
+msgstr "тип чата"
+
+#: telegram/models.py:43
+msgid "telegram|model|telegram_chat|role"
+msgstr "роль"
+
+#: telegram/models.py:47
+msgid "telegram|model|telegram_chat|created_at"
+msgstr "дата регистрации в боте"
+
+#: telegram/models.py:54
+msgid "telegram|model|telegram_chat"
+msgstr "Telegram чат"
+
+#: telegram/models.py:55
+msgid "telegram|model|telegram_chats"
+msgstr "Telegram чаты"
+
+#: units/apps.py:8
+msgid "units|app"
+msgstr "точки продаж"
+
+#: units/models.py:10
+msgid "units|model|region|name"
+msgstr "название региона"
+
+#: units/models.py:17
+msgid "units|model|region"
+msgstr "регион"
+
+#: units/models.py:18
+msgid "units|model|regions"
+msgstr "регионы"
+
+#: units/models.py:24
+msgid "units|model|unit|id"
+msgstr "ID точки продаж"
+
+#: units/models.py:29
+msgid "units|model|unit|name"
+msgstr "название точки продаж"
+
+#: units/models.py:33
+msgid "units|model|unit|uuid"
+msgstr "UUID точки продаж"
+
+#: units/models.py:37
+msgid "units|model|unit|office_manager_account_name"
+msgstr "название учётки для парсинга из Dodo IS"
+
+#: units/models.py:41
+msgid "units|model|unit|dodo_is_api_account_name"
+msgstr "название учётки для использования Dodo API"
+
+#: units/models.py:46
+msgid "units|model|unit|region"
+msgstr "регион точки продаж"
+
+#: units/models.py:53
+msgid "units|model|unit"
+msgstr "точка продаж"
+
+#: units/models.py:54
+msgid "units|model|units"
+msgstr "точки продаж"
+
+#: user_roles/apps.py:8
+msgid "user_roles|app"
+msgstr "роли пользователей"
+
+#: user_roles/models.py:11
+msgid "user_roles|model|user_role|name"
+msgstr "название роли"
+
+#: user_roles/models.py:17
+msgid "user_roles|model|user_role|access_code"
+msgstr "код доступа к роли"
+
+#: user_roles/models.py:21
+msgid "user_roles|model|user_role|report_types"
+msgstr "виды отчётов"
+
+#: user_roles/models.py:25
+msgid "user_roles|model|user_role|units"
+msgstr "точки продаж"
+
+#: user_roles/models.py:32
+msgid "user_roles|model|user_role"
+msgstr "роль пользователя"
+
+#: user_roles/models.py:33
+msgid "user_roles|model|user_roles"
+msgstr "роли пользователей"
