@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
 from reports.models.report_types import ReportType
@@ -10,12 +11,12 @@ class ReportRoute(models.Model):
     report_type = models.ForeignKey(
         to=ReportType,
         on_delete=models.CASCADE,
-        verbose_name=_('reports|model|report_route|report_type'),
+        verbose_name=capfirst(_('reports|model|report_route|report_type')),
     )
     unit = models.ForeignKey(
         to=Unit,
         on_delete=models.CASCADE,
-        verbose_name=_('reports|model|report_route|unit'),
+        verbose_name=capfirst(_('reports|model|report_route|unit')),
     )
     telegram_chat = models.ForeignKey(
         to=TelegramChat,
