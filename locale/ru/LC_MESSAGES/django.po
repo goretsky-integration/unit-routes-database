@@ -54,7 +54,7 @@ msgstr "точка продаж"
 
 #: reports/models/report_routes.py:23
 msgid "reports|model|report_route|telegram chat"
-msgstr "Telegram чат"
+msgstr "телеграм чат"
 
 #: reports/models/report_routes.py:27
 msgid "reports|model|report_route"
@@ -130,11 +130,11 @@ msgstr "дата регистрации в боте"
 
 #: telegram/models.py:54
 msgid "telegram|model|telegram_chat"
-msgstr "Telegram чат"
+msgstr "телеграм чат"
 
 #: telegram/models.py:55
 msgid "telegram|model|telegram_chats"
-msgstr "Telegram чаты"
+msgstr "телеграм чаты"
 
 #: units/apps.py:8
 msgid "units|app"

@@ -47,7 +47,7 @@ class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if settings.DEBUG:
+        if not settings.DEBUG:
             del actions['activate']
             del actions['deactivate']
         return actions
@@ -61,6 +61,12 @@ class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
     def get_exclude(self, request, obj=None):
         if not settings.DEBUG:
             return 'is_active', 'name', 'id'
+
+    def get_queryset(self, request):
+        report_types = ReportType.objects.all()
+        if not settings.DEBUG:
+            report_types = report_types.filter(is_active=True)
+        return report_types
 
 
 @admin.register(ReportRoute)
