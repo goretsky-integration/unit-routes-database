@@ -10,7 +10,10 @@ __all__ = (
 
 
 @transaction.atomic
-def update_user_role(*, user: TelegramChat, role: UserRole):
+def update_user_role(*, user: TelegramChat, role: UserRole | None):
     user.role = role
     user.save()
-    ReportRoute.objects.filter(telegram_chat=user).exclude(unit__in=role.units.all()).delete()
+    report_routes = ReportRoute.objects.filter(telegram_chat=user)
+    if role is not None:
+        report_routes = report_routes.exclude(unit__in=role.units.all())
+    report_routes.delete()
