@@ -73,3 +73,4 @@ class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
 class ReportRouteAdmin(admin.ModelAdmin):
     list_filter = ('telegram_chat', 'unit', 'report_type')
     list_select_related = ('telegram_chat', 'unit', 'report_type')
+    list_display = ('telegram_chat', 'unit', 'report_type')
