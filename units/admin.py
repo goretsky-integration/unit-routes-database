@@ -25,6 +25,7 @@ class UnitAdmin(OnlyDebugAddChangeDeleteMixin, ExportMixin, admin.ModelAdmin):
     form = UnitWithIdForm
     list_filter = (
         'region',
+        'department',
         'office_manager_account_name',
         'dodo_is_api_account_name',
     )
