@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-05 23:51+0600\n"
+"POT-Creation-Date: 2023-04-08 13:10+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,12 +21,12 @@ msgstr ""
 "(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #: goretsky_integration/settings.py:100
-msgid "settings|languages|en"
-msgstr "английский"
-
-#: goretsky_integration/settings.py:101
 msgid "settings|languages|ru"
 msgstr "русский"
+
+#: goretsky_integration/settings.py:101
+msgid "settings|languages|en"
+msgstr "английский"
 
 #: reports/admin.py:13
 msgid "reports|admin|filter|title"
@@ -44,23 +44,23 @@ msgstr "статистика"
 msgid "reports|app"
 msgstr "отчёты"
 
-#: reports/models/report_routes.py:13
+#: reports/models/report_routes.py:14
 msgid "reports|model|report_route|report_type"
 msgstr "вид отчёта"
 
-#: reports/models/report_routes.py:18
+#: reports/models/report_routes.py:19
 msgid "reports|model|report_route|unit"
 msgstr "точка продаж"
 
-#: reports/models/report_routes.py:23
+#: reports/models/report_routes.py:24
 msgid "reports|model|report_route|telegram chat"
 msgstr "телеграм чат"
 
-#: reports/models/report_routes.py:27
+#: reports/models/report_routes.py:28
 msgid "reports|model|report_route"
 msgstr "маршрут отчёта"
 
-#: reports/models/report_routes.py:28
+#: reports/models/report_routes.py:29
 msgid "reports|model|report_routes"
 msgstr "маршруты отчётов"
 
@@ -88,7 +88,7 @@ msgstr "вид отчёта"
 msgid "reports|model|report_types"
 msgstr "виды отчётов"
 
-#: telegram/admin.py:16
+#: telegram/admin.py:17
 msgid "telegram|admin|telegram_chat|search_help_text"
 msgstr "поиск по имени пользователя, нику, ID чата"
 
@@ -140,47 +140,71 @@ msgstr "телеграм чаты"
 msgid "units|app"
 msgstr "точки продаж"
 
-#: units/models.py:10
+#: units/models.py:9
+msgid "units|model|department|id"
+msgstr "ID департамента"
+
+#: units/models.py:14
+msgid "units|model|department|name"
+msgstr "название департамента"
+
+#: units/models.py:18
+msgid "units|model|department|uuid"
+msgstr "UUID департамента"
+
+#: units/models.py:25
+msgid "units|model|department"
+msgstr "департамент"
+
+#: units/models.py:26
+msgid "units|model|departments"
+msgstr "департаменты"
+
+#: units/models.py:33
 msgid "units|model|region|name"
 msgstr "название региона"
 
-#: units/models.py:17
+#: units/models.py:40
 msgid "units|model|region"
 msgstr "регион"
 
-#: units/models.py:18
+#: units/models.py:41
 msgid "units|model|regions"
 msgstr "регионы"
 
-#: units/models.py:24
+#: units/models.py:47
 msgid "units|model|unit|id"
 msgstr "ID точки продаж"
 
-#: units/models.py:29
+#: units/models.py:52
 msgid "units|model|unit|name"
 msgstr "название точки продаж"
 
-#: units/models.py:33
+#: units/models.py:56
 msgid "units|model|unit|uuid"
 msgstr "UUID точки продаж"
 
-#: units/models.py:37
+#: units/models.py:60
 msgid "units|model|unit|office_manager_account_name"
 msgstr "название учётки для парсинга из Dodo IS"
 
-#: units/models.py:41
+#: units/models.py:64
 msgid "units|model|unit|dodo_is_api_account_name"
 msgstr "название учётки для использования Dodo API"
 
-#: units/models.py:46
+#: units/models.py:69
 msgid "units|model|unit|region"
 msgstr "регион точки продаж"
 
-#: units/models.py:53
+#: units/models.py:76
+msgid "units|model|unit|department"
+msgstr "название департамента"
+
+#: units/models.py:83
 msgid "units|model|unit"
 msgstr "точка продаж"
 
-#: units/models.py:54
+#: units/models.py:84
 msgid "units|model|units"
 msgstr "точки продаж"
 
