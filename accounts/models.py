@@ -3,18 +3,50 @@ from django.db import models
 from django.utils.text import gettext_lazy as _
 
 
-class Account(models.Model):
-    class Role(models.IntegerChoices):
-        SHIFT_MANAGER = 3, _('accounts|model|account|role|shift_manager')
-        OFFICE_MANAGER = 7, _('accounts|model|account|role|office_manager')
-
-    name = models.CharField(max_length=255, unique=True)
-    role = models.PositiveSmallIntegerField(choices=Role.choices)
-    login = models.CharField(max_length=255)
-    password = models.CharField(max_length=255)
+class AccountRole(models.Model):
+    id = models.PositiveSmallIntegerField(
+        primary_key=True,
+        verbose_name=_('accounts|model|account_role|id')
+    )
+    name = models.CharField(
+        max_length=64,
+        unique=True,
+        verbose_name=_('accounts|model|account_role|name'),
+    )
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = _('accounts|model|account_role')
+        verbose_name_plural = _('accounts|model|account_roles')
+
+
+class Account(models.Model):
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        verbose_name=_('accounts|model|account|name'),
+    )
+    roles = models.ManyToManyField(
+        to=AccountRole,
+        verbose_name=_('accounts|model|account|role'),
+    )
+    login = models.CharField(
+        max_length=255,
+        verbose_name=_('accounts|model|account|login'),
+    )
+    password = models.CharField(
+        max_length=255,
+        verbose_name=_('accounts|model|account|password'),
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('accounts|model|account')
+        verbose_name_plural = _('accounts|model|accounts')
 
 
 class DodoISAPICredentials(models.Model):
