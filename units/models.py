@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
+from accounts.models import Account
+
 
 class Department(models.Model):
     id = models.PositiveSmallIntegerField(
@@ -55,13 +57,26 @@ class Unit(models.Model):
         unique=True,
         verbose_name=_('units|model|unit|uuid'),
     )
-    office_manager_account_name = models.CharField(
-        max_length=64,
-        verbose_name=_('units|model|unit|office_manager_account_name'),
+    office_manager_account = models.ForeignKey(
+        to=Account,
+        on_delete=models.SET_NULL,
+        related_name='office_manager_units',
+        null=True,
+        blank=True,
     )
-    dodo_is_api_account_name = models.CharField(
-        max_length=64,
-        verbose_name=_('units|model|unit|dodo_is_api_account_name'),
+    dodo_is_api_account = models.ForeignKey(
+        to=Account,
+        on_delete=models.SET_NULL,
+        related_name='dodo_is_api_units',
+        null=True,
+        blank=True,
+    )
+    shift_manager_account = models.ForeignKey(
+        to=Account,
+        on_delete=models.SET_NULL,
+        related_name='shift_manager_units',
+        null=True,
+        blank=True,
     )
     region = models.ForeignKey(
         to=Region,
