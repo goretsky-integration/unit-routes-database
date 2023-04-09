@@ -8,6 +8,7 @@ urlpatterns = i18n_patterns(
     path('units/', include('units.urls')),
     path('telegram-chats/', include('telegram.urls')),
     path('roles/', include('user_roles.urls')),
+    path('accounts/', include('accounts.urls')),
     path('', include('reports.urls')),
     prefix_default_language=False,
 )
