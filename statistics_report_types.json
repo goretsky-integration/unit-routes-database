@@ -1,0 +1,46 @@
+[
+  {
+    "name": "COOKING_TIME",
+    "verbose_name": "Время приготовления (общее)"
+  },
+  {
+    "name": "RESTAURANT_COOKING_TIME",
+    "verbose_name": "Время приготовления (ресторан)"
+  },
+  {
+    "name": "KITCHEN_PERFORMANCE",
+    "verbose_name": "Производительность кухни"
+  },
+  {
+    "name": "DELIVERY_AWAITING_TIME",
+    "verbose_name": "Время на полке / 1в1"
+  },
+  {
+    "name": "DELIVERY_SPEED",
+    "verbose_name": "Скорость доставки"
+  },
+  {
+    "name": "DELIVERY_PERFORMANCE",
+    "verbose_name": "Производительность доставки"
+  },
+  {
+    "name": "BEING_LATE_CERTIFICATES",
+    "verbose_name": "Сертификаты за опоздание"
+  },
+  {
+    "name": "DAILY_REVENUE",
+    "verbose_name": "Выручка за сегодня"
+  },
+  {
+    "name": "AWAITING_ORDERS",
+    "verbose_name": "Остывает на полке"
+  },
+  {
+    "name": "BONUS_SYSTEM",
+    "verbose_name": "Бонусная система"
+  },
+  {
+    "name": "PRODUCTIVITY_BALANCE",
+    "verbose_name": "Баланс эффективности"
+  }
+]
