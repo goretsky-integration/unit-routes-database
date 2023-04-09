@@ -4,5 +4,5 @@ from accounts.views import AccountsListView
 
 
 urlpatterns = [
-    path('', AccountsListView.as_view()),
+    path('accounts/', AccountsListView.as_view()),
 ]
