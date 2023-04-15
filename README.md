@@ -13,7 +13,6 @@ python manage.py {command}
 
 Commands:
 
-- `init_account_roles` - add all account roles.
 - `init_report_types` - add all report types.
 
 ---
