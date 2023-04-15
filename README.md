@@ -528,3 +528,9 @@ PATCH /users/{$chat_id}/access-code/
 - 404 - User/role is not found
 
 ---
+
+### Database schema
+
+<a href="https://miro.com/app/board/uXjVPtX8wQs=/?share_link_id=313956182469">
+<img src="./docs/img/database-schema.jpg" alt="Database schema">
+</a>
