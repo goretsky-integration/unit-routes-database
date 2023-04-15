@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.exceptions import PermissionDeniedError
+from core.serializers import LimitOffsetSerializer
 from telegram.selectors import get_telegram_chat_by_chat_id
 from units.models import Region
 from user_roles.selectors import get_role
@@ -12,7 +13,7 @@ from user_roles.services import update_user_role
 
 class SetUserRoleApi(APIView):
 
-    class InputSerializer(serializers.Serializer):
+    class InputSerializer(LimitOffsetSerializer):
         access_code = serializers.CharField(max_length=64, min_length=1)
 
     def patch(self, request: Request, chat_id: int):
@@ -30,12 +31,21 @@ class SetUserRoleApi(APIView):
 
 class UserRoleUnitsListApi(APIView):
 
+    class InputSerializer(LimitOffsetSerializer):
+        region_id = serializers.IntegerField(
+            min_value=1,
+            required=False,
+            allow_null=True,
+        )
+
     def get(self, request: Request, chat_id: int):
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('offset', 0))
-        region_id = request.query_params.get('region_id')
-        if region_id is not None:
-            region_id = int(region_id)
+        serializer = self.InputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        limit: int = serialized_data['limit']
+        offset: int = serialized_data['offset']
+        region_id: int | None = serialized_data['region_id']
 
         chat = get_telegram_chat_by_chat_id(chat_id)
         if chat.role is None:
@@ -62,8 +72,12 @@ class UserRoleUnitsListApi(APIView):
 class UserRoleRegionsListApi(APIView):
 
     def get(self, request: Request, chat_id: int):
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('offset', 0))
+        serializer = LimitOffsetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        limit: int = serialized_data['limit']
+        offset: int = serialized_data['offset']
 
         chat = get_telegram_chat_by_chat_id(chat_id)
         if chat.role is None:
@@ -92,8 +106,12 @@ class UserRoleRegionsListApi(APIView):
 class UserRoleReportTypesListApi(APIView):
 
     def get(self, request: Request, chat_id: int):
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('offset', 0))
+        serializer = LimitOffsetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        limit: int = serialized_data['limit']
+        offset: int = serialized_data['offset']
 
         chat = get_telegram_chat_by_chat_id(chat_id)
         if chat.role is None:

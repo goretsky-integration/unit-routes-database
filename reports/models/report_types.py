@@ -3,14 +3,15 @@ from django.utils.translation import gettext_lazy as _
 
 from django.utils.text import capfirst
 
+
 class ReportType(models.Model):
-    name = models.CharField(
+    alias = models.CharField(
         max_length=64,
         unique=True,
         db_index=True,
         verbose_name=_('reports|model|report_type|name'),
     )
-    verbose_name = models.CharField(
+    name = models.CharField(
         max_length=64,
         verbose_name=_('reports|model|report_type|verbose_name'),
     )
@@ -27,7 +28,7 @@ class ReportType(models.Model):
     )
 
     def __str__(self):
-        return self.verbose_name
+        return self.name
 
     class Meta:
         verbose_name = _('reports|model|report_type')
