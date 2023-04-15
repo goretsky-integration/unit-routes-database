@@ -3,6 +3,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.serializers import LimitOffsetSerializer
 from telegram.models import TelegramChat
 from telegram.selectors import get_telegram_chats, get_telegram_chats_by_chat_id
 from telegram.services import update_telegram_chat, create_telegram_chat
@@ -29,8 +30,12 @@ class TelegramChatsCreateListApi(APIView):
         )
 
     def get(self, request: Request):
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('offset', 0))
+        serializer = LimitOffsetSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        limit: int = serialized_data['limit']
+        offset: int = serialized_data['offset']
 
         telegram_chats = get_telegram_chats(limit=limit, offset=offset)
         is_next_page_exists = get_telegram_chats(

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.exceptions import PermissionDeniedError
+from core.serializers import LimitOffsetSerializer
 from reports.selectors import (
     get_report_routes_by_report_type_id_and_chat_id,
     get_report_routes_by_report_type_id_and_unit_id,
@@ -18,11 +19,19 @@ from telegram.selectors import (
 
 class ReportRoutesUnitsListApi(APIView):
 
+    class InputSerializer(LimitOffsetSerializer):
+        report_type_id = serializers.IntegerField(min_value=1)
+        chat_id = serializers.IntegerField()
+
     def get(self, request: Request):
-        chat_id = int(request.query_params['chat_id'])
-        report_type_id = int(request.query_params['report_type_id'])
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('offset', 0))
+        serializer = self.InputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        chat_id: int = serialized_data['chat_id']
+        report_type_id: int = serialized_data['report_type_id']
+        limit: int = serialized_data['limit']
+        offset: int = serialized_data['offset']
 
         report_routes = get_report_routes_by_report_type_id_and_chat_id(
             report_type_id=report_type_id,
@@ -46,11 +55,20 @@ class ReportRoutesUnitsListApi(APIView):
 
 class ReportRoutesChatIdsListApi(APIView):
 
+    class InputSerializer(LimitOffsetSerializer):
+        report_type_id = serializers.IntegerField(min_value=1)
+        unit_id = serializers.IntegerField(min_value=1)
+
+
     def get(self, request: Request):
-        unit_id = int(request.query_params['unit_id'])
-        report_type_id = int(request.query_params['report_type_id'])
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('offset', 0))
+        serializer = self.InputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        unit_id: int = serialized_data['unit_id']
+        report_type_id: int = serialized_data['report_type_id']
+        limit: int = serialized_data['limit']
+        offset: int = serialized_data['offset']
 
         report_routes = get_report_routes_by_report_type_id_and_unit_id(
             report_type_id=report_type_id,

@@ -1,12 +1,10 @@
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.request import Request
 
-from units.models import Unit, Department
-from units.selectors import (
-    get_regions, get_units, get_unit_by_name,
-    get_departments_by_unit_office_manager_account_name
-)
+from core.serializers import LimitOffsetSerializer
+from units.models import Department
+from units.selectors import get_regions, get_units, get_unit_by_name
 
 
 class UnitRetrieveByNameApi(APIView):
@@ -27,8 +25,13 @@ class UnitRetrieveByNameApi(APIView):
 class UnitsListApi(APIView):
 
     def get(self, request):
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('skip', 0))
+        serializer = LimitOffsetSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        limit: int = serialized_data['limit']
+        offset: int = serialized_data['offset']
+
         units = (
             get_units(limit=limit, offset=offset)
             .values('id', 'name', 'uuid', 'office_manager_account_name',
@@ -41,8 +44,10 @@ class UnitsListApi(APIView):
                     'id': unit['id'],
                     'name': unit['name'],
                     'uuid': unit['uuid'],
-                    'office_manager_account_name': unit['office_manager_account_name'],
-                    'dodo_is_api_account_name': unit['dodo_is_api_account_name'],
+                    'office_manager_account_name': unit[
+                        'office_manager_account_name'],
+                    'dodo_is_api_account_name': unit[
+                        'dodo_is_api_account_name'],
                     'region': unit['region__name'],
                 } for unit in units
             ],
@@ -54,12 +59,17 @@ class UnitsListApi(APIView):
 class UnitRegionsListApi(APIView):
 
     def get(self, request):
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('offset', 0))
-        regions = get_regions(limit=limit, offset=offset)
+        serializer = LimitOffsetSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        regions = get_regions(
+            limit=serialized_data['limit'],
+            offset=serialized_data['offset'],
+        )
         is_next_page_exists = get_regions(
             limit=1,
-            offset=limit + offset,
+            offset=serialized_data['limit'] + serialized_data['offset'],
         ).exists()
         response_data = {
             'regions': [
@@ -76,14 +86,17 @@ class UnitRegionsListApi(APIView):
 class UnitDepartmentsListApi(APIView):
 
     def get(self, request: Request):
-        limit = int(request.query_params.get('limit', 100))
-        offset = int(request.query_params.get('offset', 0))
-        office_manager_account_name: str = request.query_params['office_manager_account_name']
-        departments = get_departments_by_unit_office_manager_account_name(
-            office_manager_account_name=office_manager_account_name,
-            limit=limit + 1,
-            offset=offset,
-        ).values('id', 'name', 'uuid')
+        serializer = LimitOffsetSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        limit: int = serialized_data['limit']
+        offset: int = serialized_data['offset']
+
+        departments = (
+            Department.objects.all()[offset:offset + limit + 1]
+            .values('id', 'name', 'uuid')
+        )
 
         is_end_of_list_reached = len(departments) < limit + 1
         response_data = {
