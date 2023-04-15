@@ -1,0 +1,42 @@
+[
+  {
+    "name": "STATISTICS",
+    "verbose_name": "Отчёты по статистике"
+  },
+  {
+    "name": "INGREDIENTS_STOP_SALES",
+    "verbose_name": "Стопы (тесто, сыр, пицца-соус)"
+  },
+  {
+    "name": "STREET_STOP_SALES",
+    "verbose_name": "Стопы (Улица)"
+  },
+  {
+    "name": "SECTOR_STOP_SALES",
+    "verbose_name": "Стопы (Сектор)"
+  },
+  {
+    "name": "PIZZERIA_STOP_SALES",
+    "verbose_name": "Стопы (Пиццерия)"
+  },
+  {
+    "name": "STOPS_AND_RESUMES",
+    "verbose_name": "Стопы (Остальные ингредиенты)"
+  },
+  {
+    "name": "CANCELED_ORDERS",
+    "verbose_name": "Отмены заказов"
+  },
+  {
+    "name": "CHEATED_PHONE_NUMBERS",
+    "verbose_name": "Мошенничество с номерами"
+  },
+  {
+    "name": "WRITE_OFFS",
+    "verbose_name": "Списания ингредиентов"
+  },
+  {
+    "name": "LATE_DELIVERY_VOUCHERS",
+    "verbose_name": "Сертификаты за опоздание"
+  }
+]

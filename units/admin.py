@@ -26,8 +26,6 @@ class UnitAdmin(OnlyDebugAddChangeDeleteMixin, ExportMixin, admin.ModelAdmin):
     list_filter = (
         'region',
         'department',
-        'office_manager_account_name',
-        'dodo_is_api_account_name',
     )
     list_select_related = ('region', 'department')
     list_display = ('name', 'region', 'department')

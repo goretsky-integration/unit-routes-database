@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'telegram.apps.TelegramConfig',
     'reports.apps.ReportsConfig',
     'user_roles.apps.UserRolesConfig',
+    'accounts.apps.AccountsConfig',
 ]
 
 MIDDLEWARE = [
