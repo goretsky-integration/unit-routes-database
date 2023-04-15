@@ -1,13 +1,7 @@
 from django.contrib import admin
 from django.conf import settings
 
-from accounts.models import Account, AccountRole
-from core.mixins import OnlyDebugAddChangeDeleteMixin
-
-
-@admin.register(AccountRole)
-class AccountRoleAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
-    pass
+from accounts.models import Account
 
 
 @admin.register(Account)
