@@ -116,12 +116,16 @@ LOCALE_PATHS = [
     Path.joinpath(BASE_DIR / 'locale'),
 ]
 
-sentry_sdk.init(
-    dsn=env.str('SENTRY_DSN'),
-    integrations=(DjangoIntegration(),),
-    traces_sample_rate=env.float('SENTRY_TRACES_SAMPLE_RATE'),
-    send_default_pii=False,
-)
+SENTRY_DSN = env.str('SENTRY_DSN', default=None)
+SENTRY_TRACES_SAMPLE_RATE = env.float('SENTRY_TRACES_SAMPLE_RATE', default=None)
+
+if SENTRY_DSN is not None and SENTRY_TRACES_SAMPLE_RATE is not None:
+    sentry_sdk.init(
+        dsn=env.str('SENTRY_DSN'),
+        integrations=(DjangoIntegration(),),
+        traces_sample_rate=env.float('SENTRY_TRACES_SAMPLE_RATE'),
+        send_default_pii=False,
+    )
 
 if DEBUG:
     INSTALLED_APPS.append('silk')
