@@ -1,17 +1,7 @@
-# Unit's routes Database
-
-Сервис хранит информацию о всех подключенных юнитах,
-а также информацию о маршрутах отчетов/уведомлений.
-
----
-
-### Терминология:
-
-- Unit - точка продаж/пиццерия.
-- Chat ID - уникальный идентификатор чата в Telegram.
-- Маршрут - связка chat ID, юнита и типа отчета.
-
----
+## Overview
+- 📲 [Management Commands](#management-commands)
+- ✈️ [API Reference](#api-reference)
+- 💾 [Database Schema](#database-schema)
 
 ## Management Commands
 
@@ -529,7 +519,7 @@ PATCH /users/{$chat_id}/access-code/
 
 ---
 
-### Database schema
+## Database schema
 
 <a href="https://miro.com/app/board/uXjVPtX8wQs=/?share_link_id=313956182469">
 <img src="./docs/img/database-schema.jpg" alt="Database schema">
