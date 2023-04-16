@@ -1,20 +1,22 @@
 from django.contrib import admin
-from django.conf import settings
 
-from accounts.models import Account
+from accounts.models import (
+    Account,
+    DodoISAPICredentials,
+    DodoISSessionCredentials,
+)
 
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
+    pass
 
-    def get_fields(self, request, obj=None):
-        fields = ['name', 'roles']
-        if settings.DEBUG:
-            fields += ['login', 'password']
-        return fields
 
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = []
-        if not settings.DEBUG:
-            readonly_fields += ['name', 'roles']
-        return readonly_fields
+@admin.register(DodoISAPICredentials)
+class DodoISAPICredentialsAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(DodoISSessionCredentials)
+class DodoISSessionCredentialsAdmin(admin.ModelAdmin):
+    pass
