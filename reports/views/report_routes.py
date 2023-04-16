@@ -59,7 +59,6 @@ class ReportRoutesChatIdsListApi(APIView):
         report_type_id = serializers.IntegerField(min_value=1)
         unit_id = serializers.IntegerField(min_value=1)
 
-
     def get(self, request: Request):
         serializer = self.InputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
@@ -97,7 +96,16 @@ class ReportRoutesChatIdsListApi(APIView):
 
 class ReportRoutesCreateDeleteApi(APIView):
 
-    class InputSerializer(serializers.Serializer):
+    class InputDeleteSerializer(serializers.Serializer):
+        chat_id = serializers.IntegerField()
+        report_type_id = serializers.IntegerField(min_value=1)
+        unit_ids = serializers.ListSerializer(
+            child=serializers.IntegerField(min_value=1),
+            min_length=1,
+            max_length=100,
+        )
+
+    class InputCreateSerializer(serializers.Serializer):
         report_type_id = serializers.IntegerField()
         user_chat_id = serializers.IntegerField()
         chat_id = serializers.IntegerField()
@@ -107,12 +115,12 @@ class ReportRoutesCreateDeleteApi(APIView):
         )
 
     def post(self, request: Request):
-        serializer = self.InputSerializer(data=request.data)
+        serializer = self.InputCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
-        user_chat_id = serialized_data['user_chat_id']
-        chat_id = serialized_data['chat_id']
-        report_type_id = serialized_data['report_type_id']
+        user_chat_id: int = serialized_data['user_chat_id']
+        chat_id: int = serialized_data['chat_id']
+        report_type_id: int = serialized_data['report_type_id']
         requested_unit_ids: set[int] = set(serialized_data['unit_ids'])
 
         user = get_telegram_chat_with_scope_by_chat_id(user_chat_id)
@@ -151,9 +159,13 @@ class ReportRoutesCreateDeleteApi(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request: Request):
-        chat_id = int(request.query_params['chat_id'])
-        report_type_id = int(request.query_params['report_type_id'])
-        unit_ids = tuple(map(int, request.query_params.getlist('unit_ids')))
+        serializer = self.InputDeleteSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        chat_id: int = serialized_data['chat_id']
+        report_type_id: int = serialized_data['report_type_id']
+        unit_ids: list[int] = serialized_data['unit_ids']
 
         delete_report_routes(
             chat_id=chat_id,

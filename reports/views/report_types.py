@@ -15,7 +15,7 @@ from reports.selectors import (
 class ReportTypesListApi(APIView):
 
     def get(self, request: Request):
-        serializer = LimitOffsetSerializer(data=request.data)
+        serializer = LimitOffsetSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
 
@@ -37,7 +37,7 @@ class ReportTypesListApi(APIView):
 class StatisticsReportTypesListApi(APIView):
 
     def get(self, request: Request):
-        serializer = LimitOffsetSerializer(data=request.data)
+        serializer = LimitOffsetSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
 
