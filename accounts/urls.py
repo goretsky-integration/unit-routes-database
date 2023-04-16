@@ -1,8 +1,13 @@
 from django.urls import path
 
-from accounts.views import AccountsListView
-
+from accounts.views import (
+    AccountListApi,
+    DodoISAPICredentialsRetrieveApi,
+    DodoISSessionCredentialsRetrieveApi,
+)
 
 urlpatterns = [
-    path('accounts/', AccountsListView.as_view()),
+    path('accounts/', AccountListApi.as_view()),
+    path('auth/token/', DodoISAPICredentialsRetrieveApi.as_view()),
+    path('auth/cookies/', DodoISSessionCredentialsRetrieveApi.as_view()),
 ]
