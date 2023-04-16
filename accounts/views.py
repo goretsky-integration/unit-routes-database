@@ -1,7 +1,7 @@
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import serializers
+from rest_framework import serializers, status
 
 from accounts.models import (
     Account,
@@ -44,7 +44,12 @@ class AccountListApi(APIView):
 
 class DodoISAPICredentialsRetrieveApi(APIView):
 
-    class InputSerializer(serializers.Serializer):
+    class InputUpdateSerializer(serializers.Serializer):
+        account_name = serializers.CharField(min_length=1, max_length=255)
+        access_token = serializers.CharField(min_length=1, max_length=255)
+        refresh_token = serializers.CharField(min_length=1, max_length=255)
+
+    class InputRetrieveSerializer(serializers.Serializer):
         account_name = serializers.CharField(min_length=1, max_length=255)
 
     class OutputSerializer(serializers.ModelSerializer):
@@ -55,7 +60,7 @@ class DodoISAPICredentialsRetrieveApi(APIView):
             fields = ('account_name', 'access_token', 'refresh_token')
 
     def get(self, request: Request):
-        serializer = self.InputSerializer(data=request.query_params)
+        serializer = self.InputRetrieveSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
 
@@ -71,11 +76,34 @@ class DodoISAPICredentialsRetrieveApi(APIView):
             raise NotFoundError('No API tokens')
         return Response(self.OutputSerializer(dodo_is_api_credentials).data)
 
+    def patch(self, request: Request):
+        serializer = self.InputUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        account_name: str = serialized_data['account_name']
+        access_token: str = serialized_data['access_token']
+        refresh_token: str = serialized_data['refresh_token']
+
+        updated_rows_count = (
+            DodoISAPICredentials.objects
+            .select_related('account')
+            .filter(account__name=account_name)
+            .update(access_token=access_token, refresh_token=refresh_token)
+        )
+        response_status = (status.HTTP_204_NO_CONTENT if updated_rows_count
+                           else status.HTTP_404_NOT_FOUND)
+        return Response(status=response_status)
+
 
 class DodoISSessionCredentialsRetrieveApi(APIView):
 
-    class InputSerializer(serializers.Serializer):
+    class InputRetrieveSerializer(serializers.Serializer):
         account_name = serializers.CharField(min_length=1, max_length=255)
+
+    class InputUpdateSerializer(serializers.Serializer):
+        account_name = serializers.CharField(min_length=1, max_length=255)
+        cookies = serializers.JSONField()
 
     class OutputSerializer(serializers.ModelSerializer):
         account_name = serializers.CharField(source='account.name')
@@ -85,7 +113,7 @@ class DodoISSessionCredentialsRetrieveApi(APIView):
             fields = ('account_name', 'cookies')
 
     def get(self, request: Request):
-        serializer = self.InputSerializer(data=request.query_params)
+        serializer = self.InputRetrieveSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
 
@@ -100,3 +128,21 @@ class DodoISSessionCredentialsRetrieveApi(APIView):
         if dodo_is_session_credentials is None:
             raise NotFoundError('No cookies')
         return Response(self.OutputSerializer(dodo_is_session_credentials).data)
+
+    def patch(self, request: Request):
+        serializer = self.InputUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+
+        account_name: str = serialized_data['account_name']
+        cookies = serialized_data['cookies']
+
+        updated_rows_count = (
+            DodoISSessionCredentials.objects
+            .select_related('account')
+            .filter(account__name=account_name)
+            .update(cookies=cookies)
+        )
+        response_status = (status.HTTP_204_NO_CONTENT if updated_rows_count
+                           else status.HTTP_404_NOT_FOUND)
+        return Response(status=response_status)
