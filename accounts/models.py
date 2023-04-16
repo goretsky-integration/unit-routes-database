@@ -4,7 +4,7 @@ from django.utils.text import gettext_lazy as _
 
 
 class Account(models.Model):
-    class AccountRole(models.IntegerChoices):
+    class Role(models.IntegerChoices):
         SHIFT_MANAGER = 3, _('accounts|model|account|role|shift_manager')
         OFFICE_MANAGER = 7, _('accounts|model|account|role|office_manager')
 
@@ -15,7 +15,7 @@ class Account(models.Model):
     )
     role = models.PositiveSmallIntegerField(
         null=True,
-        choices=AccountRole.choices,
+        choices=Role.choices,
         verbose_name=_('accounts|model|account|role'),
     )
     login = models.CharField(
@@ -33,6 +33,10 @@ class Account(models.Model):
     class Meta:
         verbose_name = _('accounts|model|account')
         verbose_name_plural = _('accounts|model|accounts')
+
+    @property
+    def role_name(self) -> str:
+        return self.Role(self.role).name
 
 
 class DodoISAPICredentials(models.Model):
