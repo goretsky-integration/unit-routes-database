@@ -18,6 +18,15 @@ def test_closing_dodo_is_auth_http_client_with_missing_base_url():
             pass
 
 
+def test_closing_dodo_is_auth_http_client_has_specific_headers():
+    base_url = "https://example.com"
+    with closing_dodo_is_auth_http_client(
+            base_url=base_url,
+    ) as auth_client:
+        assert 'user-agent' in auth_client.headers
+        assert auth_client.headers['user-agent'] == 'dodoextbot'
+
+
 def test_closing_dodo_is_auth_http_client_with_timeout(httpx_mock: HTTPXMock):
     base_url = "https://example.com"
     timeout = 10
