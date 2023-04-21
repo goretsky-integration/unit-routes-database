@@ -1,11 +1,7 @@
 from django.db.models import QuerySet
 
 from core.exceptions import NotFoundError
-from units.models import Region, Unit, Department
-
-
-def get_regions(*, limit: int, offset: int) -> QuerySet[Region]:
-    return Region.objects.all()[offset:offset + limit]
+from units.models import Unit, Department
 
 
 def get_units(*, limit: int, offset: int) -> QuerySet[Unit]:

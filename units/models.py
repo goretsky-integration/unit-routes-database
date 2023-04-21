@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Account
@@ -28,21 +27,6 @@ class Department(models.Model):
         verbose_name_plural = _('units|model|departments')
 
 
-class Region(models.Model):
-    name = models.CharField(
-        max_length=64,
-        unique=True,
-        verbose_name=_('units|model|region|name'),
-    )
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = _('units|model|region')
-        verbose_name_plural = _('units|model|regions')
-
-
 class Unit(models.Model):
     id = models.IntegerField(
         primary_key=True,
@@ -56,11 +40,6 @@ class Unit(models.Model):
     uuid = models.UUIDField(
         unique=True,
         verbose_name=_('units|model|unit|uuid'),
-    )
-    region = models.ForeignKey(
-        to=Region,
-        on_delete=models.CASCADE,
-        verbose_name=capfirst(_('units|model|unit|region')),
     )
     department = models.ForeignKey(
         to=Department,

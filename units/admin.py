@@ -3,7 +3,7 @@ from import_export.admin import ExportMixin
 
 from core.mixins import OnlyDebugAddChangeDeleteMixin
 from units.forms import UnitWithIdForm
-from units.models import Region, Unit, Department
+from units.models import Unit, Department
 
 
 class UnitInline(admin.TabularInline):
@@ -12,11 +12,6 @@ class UnitInline(admin.TabularInline):
 
 @admin.register(Department)
 class DepartmentAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
-    inlines = (UnitInline,)
-
-
-@admin.register(Region)
-class RegionAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
     inlines = (UnitInline,)
 
 
