@@ -3,7 +3,8 @@ from django.contrib import admin
 from accounts.models import (
     Account,
     DodoISAPICredentials,
-    DodoISSessionCredentials,
+    OfficeManagerSessionCredentials,
+    ShiftManagerSessionCredentials,
 )
 
 
@@ -17,6 +18,11 @@ class DodoISAPICredentialsAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(DodoISSessionCredentials)
-class DodoISSessionCredentialsAdmin(admin.ModelAdmin):
+@admin.register(OfficeManagerSessionCredentials)
+class OfficeManagerSessionCredentialsAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(ShiftManagerSessionCredentials)
+class ShiftManagerSessionCredentialsAdmin(admin.ModelAdmin):
     pass
