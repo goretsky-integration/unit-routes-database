@@ -1,6 +1,7 @@
 from django.db import models
-
 from django.utils.text import gettext_lazy as _
+
+from units.models import Department, Unit
 
 
 class Account(models.Model):
@@ -43,10 +44,35 @@ class DodoISAPICredentials(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     access_token = models.CharField(max_length=255)
     refresh_token = models.CharField(max_length=255)
+    department = models.ForeignKey(
+        to=Department,
+        on_delete=models.CASCADE,
+        null=True,
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class DodoISSessionCredentials(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    cookies = models.JSONField()
+class OfficeManagerSessionCredentials(models.Model):
+    account = models.ForeignKey(
+        to=Account,
+        on_delete=models.CASCADE,
+    )
+    cookies = models.JSONField(null=True)
+    department = models.ForeignKey(
+        to=Department,
+        on_delete=models.CASCADE,
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class ShiftManagerSessionCredentials(models.Model):
+    account = models.ForeignKey(
+        to=Account,
+        on_delete=models.CASCADE,
+    )
+    cookies = models.JSONField(null=True)
+    unit = models.ForeignKey(
+        to=Unit,
+        on_delete=models.CASCADE,
+    )
     updated_at = models.DateTimeField(auto_now=True)
