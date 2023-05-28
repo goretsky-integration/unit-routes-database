@@ -131,3 +131,8 @@ if SENTRY_DSN is not None and SENTRY_TRACES_SAMPLE_RATE is not None:
 if DEBUG:
     INSTALLED_APPS.append('silk')
     MIDDLEWARE.append('silk.middleware.SilkyMiddleware')
+
+DODO_AUTH_USER_AGENT = 'dodoextbot'
+DODO_IS_API_CLIENT_ID = env.str('DODO_IS_API_CLIENT_ID')
+DODO_IS_API_CLIENT_SECRET = env.str('DODO_IS_API_CLIENT_SECRET')
+DODO_IS_COUNTRY_CODE = env.str('COUNTRY_CODE')
