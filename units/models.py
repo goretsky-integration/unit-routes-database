@@ -57,24 +57,13 @@ class Unit(models.Model):
         unique=True,
         verbose_name=_('units|model|unit|uuid'),
     )
-    office_manager_account = models.ForeignKey(
-        to=Account,
-        on_delete=models.SET_NULL,
-        related_name='office_manager_units',
+    office_manager_account_name = models.CharField(
+        max_length=255,
         null=True,
         blank=True,
     )
-    dodo_is_api_account = models.ForeignKey(
-        to=Account,
-        on_delete=models.SET_NULL,
-        related_name='dodo_is_api_units',
-        null=True,
-        blank=True,
-    )
-    shift_manager_account = models.ForeignKey(
-        to=Account,
-        on_delete=models.SET_NULL,
-        related_name='shift_manager_units',
+    dodo_is_api_account_name = models.CharField(
+        max_length=255,
         null=True,
         blank=True,
     )
