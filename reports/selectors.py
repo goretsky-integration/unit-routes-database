@@ -6,7 +6,7 @@ from reports.models.report_routes import ReportRoute
 
 
 def get_report_types() -> QuerySet[ReportType]:
-    return ReportType.objects.all()
+    return ReportType.objects.order_by('-priority')
 
 
 def get_report_type_by_name(name: str) -> ReportType:

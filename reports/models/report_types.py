@@ -22,6 +22,10 @@ class ReportType(models.Model):
         blank=True,
         verbose_name=_('reports|model|report_type|parent'),
     )
+    priority = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name=_('reports|model|report_type|priority'),
+    )
     is_active = models.BooleanField(
         default=False,
         verbose_name=capfirst(_('reports|model|report_type|is_active')),

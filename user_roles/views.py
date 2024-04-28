@@ -120,7 +120,7 @@ class UserRoleReportTypesListApi(APIView):
         report_types = (
             chat.role
             .report_types
-            .order_by('id')[offset:limit + 1 + offset]
+            .order_by('-priority')[offset:limit + 1 + offset]
             .values('id', 'name', 'verbose_name')
         )
         is_next_page_exists = len(report_types) == limit + 1
