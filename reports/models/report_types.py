@@ -5,13 +5,13 @@ from django.utils.text import capfirst
 
 
 class ReportType(models.Model):
-    alias = models.CharField(
+    name = models.CharField(
         max_length=64,
         unique=True,
         db_index=True,
         verbose_name=_('reports|model|report_type|name'),
     )
-    name = models.CharField(
+    verbose_name = models.CharField(
         max_length=64,
         verbose_name=_('reports|model|report_type|verbose_name'),
     )
