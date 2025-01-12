@@ -1,14 +1,15 @@
-from django.db.models import QuerySet
-
+from accounts.exceptions import AccountNotFoundError
 from accounts.models import Account
 
+__all__ = ('get_account_by_name', 'get_accounts')
 
-def get_accounts(
-        *,
-        limit: int | None = None,
-        offset: int | None = None,
-) -> QuerySet[Account]:
-    accounts = Account.objects.prefetch_related('roles')
-    if limit is not None and offset is not None:
-        accounts = accounts[offset:limit + offset]
-    return accounts
+
+def get_account_by_name(name: str) -> Account:
+    try:
+        return Account.objects.get(name=name)
+    except Account.DoesNotExist:
+        raise AccountNotFoundError
+
+
+def get_accounts() -> list[dict]:
+    return Account.objects.values('name', 'login', 'password')
