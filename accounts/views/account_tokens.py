@@ -20,4 +20,3 @@ class AccountTokensRetrieveApi(APIView):
         account_tokens = get_decrypted_account_tokens(account_name)
         serializer = AccountTokensRetrieveOutputSerializer(account_tokens)
         return Response(serializer.data)
-a
