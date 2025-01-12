@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "goretsky-integration__database"
+name = "goretsky-integration-database"
 version = "1.0.0"
 description = ""
 authors = ["usbtypec1 <eldos.baktybekov@gmail.com>"]

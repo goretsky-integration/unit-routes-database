@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
+from import_export.admin import ImportExportModelAdmin
+from import_export.resources import ModelResource
 
 from core.mixins import OnlyDebugAddChangeDeleteMixin
 from reports.models.report_routes import ReportRoute
@@ -41,8 +43,14 @@ def deactivate(modeladmin, request, queryset):
     queryset.update(is_active=False)
 
 
+class ReportTypeResource(ModelResource):
+    class Meta:
+        model = ReportType
+
+
 @admin.register(ReportType)
-class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
+class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, ImportExportModelAdmin):
+    resource_class = ReportTypeResource
     actions = (activate, deactivate)
 
     def get_actions(self, request):
@@ -69,8 +77,14 @@ class ReportTypeAdmin(OnlyDebugAddChangeDeleteMixin, admin.ModelAdmin):
         return report_types
 
 
+class ReportRouteResource(ModelResource):
+    class Meta:
+        model = ReportRoute
+
+
 @admin.register(ReportRoute)
-class ReportRouteAdmin(admin.ModelAdmin):
+class ReportRouteAdmin(ImportExportModelAdmin):
+    resource_class = ReportRouteResource
     list_filter = ('telegram_chat', 'unit', 'report_type')
     list_select_related = ('telegram_chat', 'unit', 'report_type')
     list_display = ('telegram_chat', 'unit', 'report_type')
