@@ -1,13 +1,21 @@
 from django.contrib import admin
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
+from import_export.admin import ImportExportModelAdmin
+from import_export.resources import ModelResource
 
 from telegram.models import TelegramChat
 from user_roles.services import update_user_role
 
 
+class TelegramChatResource(ModelResource):
+    class Meta:
+        model = TelegramChat
+
+
 @admin.register(TelegramChat)
-class TelegramChatAdmin(admin.ModelAdmin):
+class TelegramChatAdmin(ImportExportModelAdmin):
+    resource_class = TelegramChatResource
     list_filter = ('type', 'role')
     list_display = ('title', 'username', 'type', 'role', 'created_at')
     list_select_related = ('role',)
