@@ -1,8 +1,16 @@
 from django.urls import path
 
-from accounts.views import AccountsListView
-
+from accounts.views import AccountListApi, AccountTokensRetrieveApi
 
 urlpatterns = [
-    path('accounts/', AccountsListView.as_view()),
+    path(
+        r'accounts/',
+        AccountListApi.as_view(),
+        name='account-list',
+    ),
+    path(
+        r'auth/token/',
+        AccountTokensRetrieveApi.as_view(),
+        name='account-token-retrieve-update',
+    ),
 ]

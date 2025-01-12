@@ -128,6 +128,8 @@ if SENTRY_DSN is not None and SENTRY_TRACES_SAMPLE_RATE is not None:
         send_default_pii=False,
     )
 
+FERNET_KEY = env.str('FERNET_KEY')
+
 if DEBUG:
     INSTALLED_APPS.append('silk')
     MIDDLEWARE.append('silk.middleware.SilkyMiddleware')

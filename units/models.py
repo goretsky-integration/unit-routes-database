@@ -2,8 +2,6 @@ from django.db import models
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
-from accounts.models import Account
-
 
 class Department(models.Model):
     id = models.PositiveSmallIntegerField(
