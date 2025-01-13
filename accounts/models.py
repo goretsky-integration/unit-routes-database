@@ -5,7 +5,7 @@ __all__ = ('Account', 'AccountCookies', 'AccountTokens')
 
 class Account(models.Model):
     name = models.CharField(max_length=64, unique=True, db_index=True)
-    encrypted_login = models.CharField(max_length=255)
+    login = models.CharField(max_length=255)
     encrypted_password = models.CharField(max_length=255)
 
     def __str__(self):
@@ -13,7 +13,7 @@ class Account(models.Model):
 
 
 class AccountTokens(models.Model):
-    account = models.OneToOneField(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     encrypted_access_token = models.CharField(max_length=255)
     encrypted_refresh_token = models.CharField(max_length=255)
     updated_at = models.DateTimeField(auto_now=True)
@@ -26,7 +26,8 @@ class AccountTokens(models.Model):
 
 
 class AccountCookies(models.Model):
-    account = models.OneToOneField(Account, on_delete=models.CASCADE)
+    name = models.CharField(max_length=64, unique=True, db_index=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     encrypted_cookies = models.CharField(max_length=255)
     updated_at = models.DateTimeField(auto_now=True)
 

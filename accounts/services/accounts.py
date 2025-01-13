@@ -63,7 +63,7 @@ class AccountPlainCookies:
 def decrypt_account(account: Account) -> AccountWithPlainCredentials:
     return AccountWithPlainCredentials(
         name=account.name,
-        login=decrypt_string(account.encrypted_login),
+        login=account.login,
         password=decrypt_string(account.encrypted_password),
     )
 
