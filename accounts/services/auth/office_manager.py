@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from dataclasses import dataclass
 from enum import IntEnum
 from typing import Protocol
 from uuid import UUID
@@ -8,15 +7,12 @@ import httpx
 from bs4 import BeautifulSoup
 from django.conf import settings
 
-from accounts.models import Account, AccountCookies
-from accounts.selectors import get_office_manager_accounts
-from accounts.services.account_cookies import update_account_cookies
+from accounts.models import AccountCookies
 from accounts.services.accounts import (
     AccountWithPlainCredentials,
     decrypt_account,
 )
 from accounts.services.crypt import encrypt_dict
-from units.models import Unit
 
 
 @dataclass(frozen=True, slots=True)
