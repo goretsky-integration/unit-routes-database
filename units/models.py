@@ -65,6 +65,11 @@ class Unit(models.Model):
         null=True,
         blank=True,
     )
+    shift_manager_account_name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+    )
     region = models.ForeignKey(
         to=Region,
         on_delete=models.CASCADE,
