@@ -10,6 +10,7 @@ from django.conf import settings
 
 from accounts.models import Account
 from accounts.selectors import get_office_manager_accounts
+from accounts.services.account_cookies import update_account_cookies
 from accounts.services.accounts import (
     AccountWithPlainCredentials,
     decrypt_account,
@@ -388,5 +389,7 @@ class OfficeManagerAccountCookiesRefreshInteractor:
             )
             cookies = dict(office_manager_http_client.cookies)
 
-        self.account.encrypted_cookies = encrypt_dict(cookies)
-        self.account.save()
+        update_account_cookies(
+            account=self.account,
+            cookies=cookies,
+        )
