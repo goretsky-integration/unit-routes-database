@@ -8,7 +8,7 @@ import httpx
 from bs4 import BeautifulSoup
 from django.conf import settings
 
-from accounts.models import Account
+from accounts.models import Account, AccountCookies
 from accounts.selectors import get_office_manager_accounts
 from accounts.services.account_cookies import update_account_cookies
 from accounts.services.accounts import (
@@ -357,11 +357,13 @@ class OfficeManagerAccountAuthenticator:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class OfficeManagerAccountCookiesRefreshInteractor:
-    account: Account
+    account_cookies: AccountCookies
     department_uuid: UUID
 
     def execute(self):
-        account_with_plain_credentials = decrypt_account(self.account)
+        account_with_plain_credentials = decrypt_account(
+            self.account_cookies.account,
+        )
 
         office_manager_base_url = (
             f'https://officemanager.dodopizza.'
@@ -396,7 +398,5 @@ class OfficeManagerAccountCookiesRefreshInteractor:
             )
             cookies = dict(office_manager_http_client.cookies)
 
-        update_account_cookies(
-            account=self.account,
-            cookies=cookies,
-        )
+        self.account_cookies.encrypted_cookies = encrypt_dict(cookies)
+        self.account_cookies.save()
