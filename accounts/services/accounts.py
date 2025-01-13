@@ -94,9 +94,7 @@ def get_decrypted_account_tokens(
 def get_decrypted_account_cookies(
         account_name: str,
 ) -> AccountPlainCookies:
-    account_cookies = AccountCookies.objects.get(
-        account__name=account_name,
-    )
+    account_cookies = AccountCookies.objects.get(name=account_name)
     fernet = Fernet(settings.FERNET_KEY)
     decrypted_cookies_json = fernet.decrypt(account_cookies.encrypted_cookies)
     decrypted_cookies = json.loads(decrypted_cookies_json)
