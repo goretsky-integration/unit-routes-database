@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'import_export',
+    'django_celery_beat',
     'core.apps.CoreConfig',
     'units.apps.UnitsConfig',
     'telegram.apps.TelegramConfig',
@@ -130,6 +131,12 @@ if SENTRY_DSN is not None and SENTRY_TRACES_SAMPLE_RATE is not None:
 
 FERNET_KEY = env.str('FERNET_KEY')
 
+DODO_IS_API_CLIENT_ID = env.str('DODO_IS_API_CLIENT_ID')
+DODO_IS_API_CLIENT_SECRET = env.str('DODO_IS_API_CLIENT_SECRET')
+
 if DEBUG:
     INSTALLED_APPS.append('silk')
     MIDDLEWARE.append('silk.middleware.SilkyMiddleware')
+
+
+CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')
