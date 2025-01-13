@@ -28,7 +28,7 @@ class AccountTokens(models.Model):
 class AccountCookies(models.Model):
     name = models.CharField(max_length=64, unique=True, db_index=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    encrypted_cookies = models.CharField(max_length=255)
+    encrypted_cookies = models.CharField(max_length=65535)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
