@@ -6,7 +6,7 @@ from accounts.serializers import (
     AccountCookiesRetrieveOutputSerializer,
     AccountNameSerializer,
 )
-from accounts.services import get_decrypted_account_cookies
+from accounts.services.accounts import get_decrypted_account_cookies
 
 __all__ = ('AccountCookiesRetrieveApi',)
 

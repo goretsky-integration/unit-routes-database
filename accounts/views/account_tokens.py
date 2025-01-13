@@ -6,7 +6,7 @@ from accounts.serializers import (
     AccountNameSerializer,
     AccountTokensRetrieveOutputSerializer,
 )
-from accounts.services import get_decrypted_account_tokens
+from accounts.services.accounts import get_decrypted_account_tokens
 
 __all__ = ('AccountTokensRetrieveApi',)
 
