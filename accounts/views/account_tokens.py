@@ -14,7 +14,7 @@ __all__ = ('AccountTokensRetrieveApi',)
 class AccountTokensRetrieveApi(APIView):
 
     def get(self, request: Request) -> Response:
-        serializer = AccountNameSerializer(request.query_params)
+        serializer = AccountNameSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         account_name: str = serializer.validated_data['account_name']
         account_tokens = get_decrypted_account_tokens(account_name)
