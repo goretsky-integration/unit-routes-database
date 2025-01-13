@@ -370,9 +370,16 @@ class OfficeManagerAccountCookiesRefreshInteractor:
         auth_base_url = 'https://auth.dodois.io'
 
         with (
-            httpx.Client(base_url=auth_base_url) as auth_http_client,
-            httpx.Client(base_url=office_manager_base_url)
-            as office_manager_http_client,
+            httpx.Client(
+                base_url=auth_base_url,
+                headers={'User-Agent': 'dodoextbot'},
+                follow_redirects=True,
+            ) as auth_http_client,
+            httpx.Client(
+                base_url=office_manager_base_url,
+                headers={'User-Agent': 'dodoextbot'},
+                follow_redirects=True,
+            ) as office_manager_http_client,
         ):
             dodo_is_auth_service = DodoISAuthService(auth_http_client)
             office_manager_service = OfficeManagerService(
