@@ -1,6 +1,7 @@
 from celery import shared_task
 
-from accounts.models import AccountCookies
+from accounts.models import AccountCookies, AccountTokens
+from accounts.services.auth.api_tokens import APITokensRefreshInteractor
 from accounts.services.auth.office_manager import (
     OfficeManagerAccountCookiesRefreshInteractor,
 )
@@ -61,3 +62,10 @@ def refresh_shift_manager_accounts_cookies():
             unit_uuid=unit_uuid,
         )
         interactor.execute()
+
+
+@shared_task
+def refresh_api_tokens():
+    accounts_tokens = AccountTokens.objects.all()
+    for account_tokens in accounts_tokens:
+        APITokensRefreshInteractor(account_tokens=account_tokens).execute()
