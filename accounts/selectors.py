@@ -16,10 +16,10 @@ def get_account_by_name(name: str) -> Account:
 def get_accounts() -> list[dict]:
     return [
         {
-            'name': account['name'],
-            'login': account['login'],
-            'password': account['encrypted_password'],
+            'name': account_name,
+            'login': '',
+            'password': '',
         }
-        for account in
-        Account.objects.values('name', 'login', 'encrypted_password')
+        for account_name in
+        AccountCookies.objects.values_list('name', flat=True)
     ]
