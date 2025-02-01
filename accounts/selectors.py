@@ -14,4 +14,12 @@ def get_account_by_name(name: str) -> Account:
 
 
 def get_accounts() -> list[dict]:
-    return Account.objects.values('name', 'login', 'password')
+    return [
+        {
+            'name': account['name'],
+            'login': account['login'],
+            'password': account['encrypted_password'],
+        }
+        for account in
+        Account.objects.values('name', 'login', 'encrypted_password')
+    ]
