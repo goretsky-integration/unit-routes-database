@@ -42,16 +42,14 @@ class DodoISAuthService:
     ) -> str:
         request_data = {
             'ReturnUrl': account_login_form_data.return_url,
-            'Username': account_login_form_data.username,
+            'Login': account_login_form_data.username,
             'Password': account_login_form_data.password,
-            'TenantName': account_login_form_data.tenant_name,
-            'CountryCode': account_login_form_data.country_code,
             'authMethod': account_login_form_data.auth_method,
             '__RequestVerificationToken':
                 account_login_form_data.request_verification_token,
             'RememberLogin': account_login_form_data.remember_login,
         }
-        url = '/account/login'
+        url = '/login'
         response = self._http_client.post(
             url=url,
             data=request_data,
