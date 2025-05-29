@@ -10,6 +10,7 @@ urlpatterns = i18n_patterns(
     path('roles/', include('user_roles.urls')),
     path('', include('accounts.urls')),
     path('', include('reports.urls')),
+    path('write-offs/', include('write_offs.urls')),
     prefix_default_language=False,
 )
 
