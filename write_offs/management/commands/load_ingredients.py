@@ -21,7 +21,7 @@ class DodoIsApiGateway:
 
     def get_stock_items(self, *, take: int, skip: int) -> dict:
         response = self.__http_client.get(
-            'https://api.dodois.ru/api/v1/stock/items',
+            'https://api.dodois.io/dodopizza/ru/accounting/stock-items',
             params={'take': take, 'skip': skip},
         )
         response.raise_for_status()
