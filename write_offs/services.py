@@ -3,19 +3,14 @@ from datetime import timedelta
 from write_offs.models import IngredientWriteOff
 
 
-def get_upcoming_write_offs():
+def get_upcoming_write_offs(minutes: int):
     """
     Returns write-offs that are due in exactly 15, 10, or 5 minutes and not notified yet.
     """
     now = timezone.now().replace(second=0, microsecond=0)
-    target_times = [
-        now + timedelta(minutes=15),
-        now + timedelta(minutes=10),
-        now + timedelta(minutes=5),
-    ]
-    return IngredientWriteOff.objects.filter(
+    return IngredientWriteOff.objects.select_related('unit', 'ingredient').filter(
         is_notification_sent=False,
-        to_write_off_at__in=target_times,
+        to_write_off_at=now + timedelta(minutes=minutes),
     )
 
 
