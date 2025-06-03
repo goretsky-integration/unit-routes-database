@@ -38,7 +38,7 @@ class Command(BaseCommand):
             )
             with httpx.Client(
                     headers={
-                        'Authorization': f'{access_token}'
+                        'Authorization': f'Bearer {access_token}'
                     }
             ) as http_client:
                 dodo_is_api_gateway = DodoIsApiGateway(http_client)
