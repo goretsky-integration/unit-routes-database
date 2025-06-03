@@ -60,8 +60,7 @@ class Command(BaseCommand):
                     if ingredients:
                         Ingredient.objects.bulk_create(
                             ingredients,
-                            update_conflicts=True,
-                            update_fields=('name',)
+                            ignore_conflicts=True,
                         )
                         self.stdout.write(
                             self.style.SUCCESS(
