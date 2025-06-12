@@ -7,7 +7,6 @@ from django.db.models import QuerySet
 from reports.models.report_routes import ReportRoute
 from write_offs.models import IngredientWriteOff
 from write_offs.services import (
-    get_expired_repeating_write_offs,
     get_upcoming_write_offs, get_write_off_status,
 )
 
