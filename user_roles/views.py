@@ -71,7 +71,7 @@ class UserRoleUnitsListApi(APIView):
 class UserRoleRegionsListApi(APIView):
 
     def get(self, request: Request, chat_id: int):
-        serializer = LimitOffsetSerializer(data=request.data)
+        serializer = LimitOffsetSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
 
@@ -105,7 +105,7 @@ class UserRoleRegionsListApi(APIView):
 class UserRoleReportTypesListApi(APIView):
 
     def get(self, request: Request, chat_id: int):
-        serializer = LimitOffsetSerializer(data=request.data)
+        serializer = LimitOffsetSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
 
