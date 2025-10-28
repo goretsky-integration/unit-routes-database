@@ -49,7 +49,7 @@ class DodoISAuthService:
                 account_login_form_data.request_verification_token,
             'RememberLogin': account_login_form_data.remember_login,
         }
-        url = '/login'
+        url = '/login/password'
         response = self._http_client.post(
             url=url,
             data=request_data,

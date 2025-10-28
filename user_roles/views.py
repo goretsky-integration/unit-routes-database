@@ -39,14 +39,13 @@ class UserRoleUnitsListApi(APIView):
         )
 
     def get(self, request: Request, chat_id: int):
-        serializer = self.InputSerializer(data=request.data)
+        serializer = self.InputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
 
         limit: int = serialized_data['limit']
         offset: int = serialized_data['offset']
         region_id: int | None = serialized_data['region_id']
-
         chat = get_telegram_chat_by_chat_id(chat_id)
         if chat.role is None:
             raise PermissionDeniedError('User has no any role')
