@@ -16,7 +16,6 @@ dependencies = [
     "lxml>=5.4.0",
     "pika>=1.3.2",
     "psycopg2-binary>=2.9.10",
-    "pytelegrambotapi>=4.29.1",
     "redis>=6.2.0",
     "sentry-sdk>=2.29.1",
 ]
