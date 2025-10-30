@@ -208,8 +208,8 @@ def filter_relevant_items(
         if 'не использовать' in item.name.lower():
             continue
         if is_all_zero(
-            item.average_weekend_expense,
-            item.average_weekday_expense,
+            item.avg_weekday_expense,
+            item.avg_weekend_expense,
             item.balance_in_money,
             item.quantity,
             item.days_until_balance_runs_out,
