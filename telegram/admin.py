@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportExportModelAdmin
 from import_export.resources import ModelResource
 
-from telegram.models import TelegramChat
+from telegram.models import TelegramChat, TelegramMessage
 from user_roles.services import update_user_role
 
 
@@ -38,3 +38,8 @@ class TelegramChatAdmin(ImportExportModelAdmin):
             if telegram_chat.role != obj.role:
                 update_user_role(user=telegram_chat, role=obj.role)
         super().save_model(request, obj, form, change)
+
+
+@admin.register(TelegramMessage)
+class TelegramMessageAdmin(admin.ModelAdmin):
+    pass
