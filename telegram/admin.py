@@ -100,7 +100,6 @@ class TelegramMessageAdmin(admin.ModelAdmin):
             {
                 'fields': (
                     'chat_id',
-                    'bot_token',
                     'text',
                     'media_file_ids',
                     'to_be_sent_at',
