@@ -8,7 +8,7 @@ from reports.services import (
     filter_running_out_stock_items,
     filter_relevant_items,
     group_inventory_stocks,
-    format_running_out_stock_items,
+    format_running_out_stock_items, get_empty_units_inventory_stocks,
 )
 from telegram.services import batch_create_telegram_messages
 from units.models import Unit
@@ -24,6 +24,7 @@ class CreateRunningOutInventoryStocksReportUseCase:
             units = Unit.objects.filter(
                 dodo_is_api_account_name=account_token.account.name,
             )
+            unit_ids = {unit.uuid for unit in units}
             unit_id_to_name = {unit.uuid: unit.name for unit in units}
 
             access_token = decrypt_string(account_token.encrypted_access_token)
@@ -32,7 +33,7 @@ class CreateRunningOutInventoryStocksReportUseCase:
                 access_token=access_token,
             ) as dodo_is_api_gateway:
                 inventory_stocks = dodo_is_api_gateway.get_inventory_stocks(
-                    unit_ids=[unit.uuid for unit in units],
+                    unit_ids=unit_ids,
                 )
             relevant_inventory_stocks = filter_relevant_items(inventory_stocks)
 
@@ -42,7 +43,14 @@ class CreateRunningOutInventoryStocksReportUseCase:
             )
             units_stocks = group_inventory_stocks(running_out_stocks)
 
-            for unit_stocks in units_stocks:
+            unit_ids_with_running_out_stocks = {
+                unit_stocks.unit_id for unit_stocks in units_stocks
+            }
+            empty_units_stocks = get_empty_units_inventory_stocks(
+                unit_ids=unit_ids - unit_ids_with_running_out_stocks,
+            )
+            all_units_stocks = units_stocks + empty_units_stocks
+            for unit_stocks in all_units_stocks:
                 unit_name = unit_id_to_name.get(unit_stocks.unit_id, '?')
 
                 running_out_stock_items_text = format_running_out_stock_items(
@@ -54,7 +62,7 @@ class CreateRunningOutInventoryStocksReportUseCase:
                     ReportRoute.objects
                     .filter(
                         report_type__name='INVENTORY_STOCKS',
-                        unit__uuid=unit_stocks.unit_id
+                        unit__uuid=unit_stocks.unit_id,
                     )
                     .values_list('telegram_chat__chat_id', flat=True)
                 )

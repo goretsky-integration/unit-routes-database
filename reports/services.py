@@ -164,13 +164,13 @@ class DodoIsApiGateway:
                     'units': join_unit_ids_with_comma(unit_ids_batch),
                     'take': take,
                     'skip': batch_skip,
-                }
+                },
             )
             batch_skip += take
 
             try:
                 inventory_stocks_response = InventoryStocksResponse.model_validate_json(
-                    response.text
+                    response.text,
                 )
             except ValidationError:
                 logger.exception(
@@ -237,6 +237,18 @@ class UnitInventoryStocks:
     items: list[InventoryStockItem]
 
 
+def get_empty_units_inventory_stocks(
+    unit_ids: Iterable[UUID],
+) -> list[UnitInventoryStocks]:
+    return [
+        UnitInventoryStocks(
+            unit_id=unit_id,
+            items=[],
+        )
+        for unit_id in unit_ids
+    ]
+
+
 def group_inventory_stocks(
     items: Iterable[InventoryStockItem],
 ) -> list[UnitInventoryStocks]:
@@ -278,11 +290,11 @@ def format_running_out_stock_items(
     for item in items:
         measurement_unit_name = MEASUREMENT_UNIT_TO_NAME.get(
             item.measurement_unit,
-            item.measurement_unit
+            item.measurement_unit,
         )
         lines.append(
             f'📍 {item.name}'
-            f' - остаток <b><u>{item.quantity} {measurement_unit_name}</u></b>'
+            f' - остаток <b><u>{item.quantity} {measurement_unit_name}</u></b>',
         )
 
     return '\n'.join(lines)
