@@ -56,7 +56,7 @@ class CreateRunningOutInventoryStocksReportUseCase:
                         report_type__name='INVENTORY_STOCKS',
                         unit__uuid=unit_stocks.unit_id
                     )
-                    .values_list('telegram_chat_id', flat=True)
+                    .values_list('telegram_chat__chat_id', flat=True)
                 )
 
                 batch_create_telegram_messages(
