@@ -143,7 +143,7 @@ def join_unit_ids_with_comma(unit_ids: Iterable[int]) -> str:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class DodoIsApiGateway:
-    batch_size: ClassVar[Final[int]] = 30
+    batch_size: ClassVar[int] = 30
     http_client: DodoIsApiHttpClient
 
     def get_inventory_stocks(
