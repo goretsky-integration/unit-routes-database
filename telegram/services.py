@@ -54,7 +54,7 @@ def create_telegram_chat(
 
 
 def get_telegram_bot() -> TeleBot:
-    return TeleBot(token=settings.TELEGRAM_BOT_TOKEN)
+    return TeleBot(token=settings.TELEGRAM_BOT_TOKEN, parse_mode='HTML')
 
 
 def get_pending_messages(*, limit: int = 10) -> QuerySet[TelegramMessage]:
