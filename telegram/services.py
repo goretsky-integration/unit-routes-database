@@ -238,7 +238,6 @@ def batch_create_telegram_messages(
         extra_params['media_file_ids'] = list(media_file_ids)
     messages = [
         TelegramMessage(
-            bot_token=settings.TELEGRAM_BOT_TOKEN,
             chat_id=chat_id,
             text=text,
             reply_markup=reply_markup,
