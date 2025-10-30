@@ -57,7 +57,7 @@ def get_telegram_bot() -> TeleBot:
     return TeleBot(token=settings.TELEGRAM_BOT_TOKEN, parse_mode='HTML')
 
 
-def get_pending_messages(*, limit: int = 10) -> QuerySet[TelegramMessage]:
+def get_pending_messages(*, limit: int = 30) -> QuerySet[TelegramMessage]:
     return TelegramMessage.objects.filter(
         sent_at__isnull=True,
         retries_count__gt=0,
