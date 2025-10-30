@@ -145,3 +145,5 @@ if DEBUG:
 
 CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN')

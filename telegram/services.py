@@ -18,8 +18,7 @@ from telebot.types import (
 )
 
 from core.exceptions import AlreadyExistsError
-from telegram.models import TelegramChat
-from telegram.models import TelegramMessage
+from telegram.models import TelegramChat, TelegramMessage
 from telegram.selectors import get_telegram_chats_by_chat_id
 
 
@@ -223,3 +222,31 @@ class TelegramMessageSender:
             ]
 
         self.message.save()
+
+
+def batch_create_telegram_messages(
+    chat_ids: Iterable[int],
+    text: str,
+    reply_markup: InlineKeyboardMarkup | None = None,
+    to_be_sent_at: datetime.datetime | None = None,
+    media_file_ids: Iterable[str] | None = None,
+) -> list[TelegramMessage]:
+    if reply_markup is not None:
+        reply_markup = reply_markup.to_dict()
+    if to_be_sent_at is None:
+        to_be_sent_at = timezone.now()
+    extra_params = {}
+    if media_file_ids is not None:
+        extra_params['media_file_ids'] = list(media_file_ids)
+    messages = [
+        TelegramMessage(
+            bot_token=settings.TELEGRAM_BOT_TOKEN,
+            chat_id=chat_id,
+            text=text,
+            reply_markup=reply_markup,
+            to_be_sent_at=to_be_sent_at,
+            **extra_params,
+        )
+        for chat_id in chat_ids
+    ]
+    return TelegramMessage.objects.bulk_create(messages)

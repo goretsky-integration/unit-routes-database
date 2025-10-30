@@ -1,6 +1,7 @@
 import contextlib
 import datetime
 import logging
+from collections import defaultdict
 from collections.abc import Iterable, Generator
 from dataclasses import dataclass
 from enum import StrEnum
@@ -199,12 +200,12 @@ def is_all_zero(*numbers: int | float) -> bool:
 
 
 def filter_relevant_items(
-        items: Iterable[InventoryStockItem],
+    items: Iterable[InventoryStockItem],
 ) -> list[InventoryStockItem]:
     relevant_items: list[InventoryStockItem] = []
 
     for item in items:
-        if '(не использовать)' in item.name.lower():
+        if 'не использовать' in item.name.lower():
             continue
         if is_all_zero(
             item.average_weekend_expense,
@@ -221,8 +222,8 @@ def filter_relevant_items(
 
 
 def filter_running_out_stock_items(
-        items: Iterable[InventoryStockItem],
-        threshold: int,
+    items: Iterable[InventoryStockItem],
+    threshold: int,
 ) -> list[InventoryStockItem]:
     return [
         item for item in items
@@ -230,12 +231,58 @@ def filter_running_out_stock_items(
     ]
 
 
-def filter_by_category_names(
-        items: Iterable[InventoryStockItem],
-        category_names: Iterable[InventoryStockCategoryName],
-) -> list[InventoryStockItem]:
-    category_names = set(category_names)
+@dataclass(frozen=True, slots=True, kw_only=True)
+class UnitInventoryStocks:
+    unit_id: UUID
+    items: list[InventoryStockItem]
+
+
+def group_inventory_stocks(
+    items: Iterable[InventoryStockItem],
+) -> list[UnitInventoryStocks]:
+    unit_id_to_items: dict[UUID, list[InventoryStockItem]] = defaultdict(list)
+    for item in items:
+        unit_id_to_items[item.unit_id].append(item)
     return [
-        item for item in items
-        if item.category_name in category_names
+        UnitInventoryStocks(
+            unit_id=unit_id,
+            items=items,
+        )
+        for unit_id, items in unit_id_to_items.items()
     ]
+
+
+MEASUREMENT_UNIT_TO_NAME = {
+    InventoryStockMeasurementUnit.KILOGRAM: 'кг',
+    InventoryStockMeasurementUnit.LITER: 'л',
+    InventoryStockMeasurementUnit.METER: 'м',
+    InventoryStockMeasurementUnit.QUANTITY: 'шт',
+}
+
+
+def format_running_out_stock_items(
+    unit_name: str,
+    items: Iterable[InventoryStockItem],
+) -> str:
+    items = list(items)
+
+    lines: list[str] = [f'<b>{unit_name}</b>']
+
+    if items:
+        lines.append('<b>❗️ На сегодня не хватит ❗️</b>')
+    else:
+        lines.append('<b>На сегодня всего достаточно</b>')
+
+    items.sort(key=lambda item: item.name)
+
+    for item in items:
+        measurement_unit_name = MEASUREMENT_UNIT_TO_NAME.get(
+            item.measurement_unit,
+            item.measurement_unit
+        )
+        lines.append(
+            f'📍 {item.name}'
+            f' - остаток <b><u>{item.quantity} {measurement_unit_name}</u></b>'
+        )
+
+    return '\n'.join(lines)

@@ -2,7 +2,15 @@ from dataclasses import dataclass
 
 from accounts.models import AccountTokens
 from accounts.services.crypt import decrypt_string
-from reports.services import get_dodo_is_api_gateway
+from reports.models.report_routes import ReportRoute
+from reports.services import (
+    get_dodo_is_api_gateway,
+    filter_running_out_stock_items,
+    filter_relevant_items,
+    group_inventory_stocks,
+    format_running_out_stock_items,
+)
+from telegram.services import batch_create_telegram_messages
 from units.models import Unit
 
 
@@ -16,6 +24,7 @@ class CreateRunningOutInventoryStocksReportUseCase:
             units = Unit.objects.filter(
                 dodo_is_api_account_name=account_token.account.name,
             )
+            unit_id_to_name = {unit.uuid: unit.name for unit in units}
 
             access_token = decrypt_string(account_token.encrypted_access_token)
 
@@ -25,5 +34,32 @@ class CreateRunningOutInventoryStocksReportUseCase:
                 inventory_stocks = dodo_is_api_gateway.get_inventory_stocks(
                     unit_ids=[unit.uuid for unit in units],
                 )
+            relevant_inventory_stocks = filter_relevant_items(inventory_stocks)
 
-                print(inventory_stocks)
+            running_out_stocks = filter_running_out_stock_items(
+                items=relevant_inventory_stocks,
+                threshold=1,
+            )
+            units_stocks = group_inventory_stocks(running_out_stocks)
+
+            for unit_stocks in units_stocks:
+                unit_name = unit_id_to_name.get(unit_stocks.unit_id, '?')
+
+                running_out_stock_items_text = format_running_out_stock_items(
+                    unit_name=unit_name,
+                    items=unit_stocks.items,
+                )
+
+                chat_ids = (
+                    ReportRoute.objects
+                    .filter(
+                        report_type__name='INVENTORY_STOCKS',
+                        unit__uuid=unit_stocks.unit_id
+                    )
+                    .values_list('telegram_chat_id', flat=True)
+                )
+
+                batch_create_telegram_messages(
+                    chat_ids=chat_ids,
+                    text=running_out_stock_items_text,
+                )
