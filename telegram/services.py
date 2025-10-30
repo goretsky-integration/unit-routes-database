@@ -103,7 +103,6 @@ def create_telegram_media_group_message(
 
     messages = [
         TelegramMessage(
-            bot_token=bot_token,
             chat_id=chat_id,
             text=text,
             media_file_ids=first_batch,
@@ -113,7 +112,6 @@ def create_telegram_media_group_message(
     for file_ids_batch in itertools.batched(remaining_file_ids, n=10):
         messages.append(
             TelegramMessage(
-                bot_token=bot_token,
                 chat_id=chat_id,
                 media_file_ids=file_ids_batch,
                 to_be_sent_at=to_be_sent_at,
