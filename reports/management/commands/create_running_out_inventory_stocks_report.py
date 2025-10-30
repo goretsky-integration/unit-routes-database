@@ -11,6 +11,6 @@ class Command(BaseCommand):
         CreateRunningOutInventoryStocksReportUseCase().execute()
         self.stdout.write(
             self.style.SUCCESS(
-                'Successfully sent running out inventory stocks report',
+                'Successfully created running out inventory stocks report',
             ),
         )
