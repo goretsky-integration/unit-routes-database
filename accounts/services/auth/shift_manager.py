@@ -110,6 +110,7 @@ class ShiftManagerAccountAuthenticator:
             ))
         sign_in_oidc_form_data = parse_sign_in_oidc_form_data(
             sign_in_oidc_form_html=sign_in_oidc_form_html,
+            scope=connect_authorize_form_data.scope,
         )
 
         self.__shift_manager_service.send_sign_in_oidc_form_data(
