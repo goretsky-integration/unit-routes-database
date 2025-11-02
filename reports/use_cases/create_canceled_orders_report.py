@@ -47,4 +47,4 @@ class CreateCanceledOrdersReportUseCase:
                 )
                 orders_response = gateway.get_partial_orders(cookies=cookies, date=self.date)
 
-                print(orders_response)
+                print(orders_response.text)
