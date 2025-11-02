@@ -1,17 +1,20 @@
 import contextlib
 import datetime
+import json
 import logging
 from collections import defaultdict
 from collections.abc import Iterable, Generator
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import StrEnum, auto
 from itertools import batched
-from typing import NewType, ClassVar, Final, Annotated
+from typing import Annotated, Any
+from typing import NewType, ClassVar, Final
 from uuid import UUID
 
 import httpx
 from django.db.utils import IntegrityError
 from pydantic import BaseModel, Field, ValidationError
+from pydantic import computed_field, field_validator
 
 from core.exceptions import AlreadyExistsError
 from reports.models.report_routes import ReportRoute
@@ -382,3 +385,153 @@ class DodoIsShiftManagerGateway:
         url = f'/api/orders/{order_id.hex.upper()}'
         response = self.http_client.get(url=url, cookies=cookies)
         return response
+
+
+class PartialOrder(BaseModel):
+    id: Annotated[UUID, Field(alias='Id')]
+
+
+class PartialOrdersResponsePagination(BaseModel):
+    current_page: Annotated[int, Field(alias='CurrentPage')]
+    next_page: Annotated[int | None, Field(alias='NextPage')]
+    per_page: Annotated[int, Field(alias='PerPage')]
+    prev_page: Annotated[int | None, Field(alias='PrevPage')]
+    total_pages: Annotated[int, Field(alias='TotalPages')]
+    total_records: Annotated[int, Field(alias='TotalRecords')]
+
+
+class PartialOrdersResponse(BaseModel):
+    items: Annotated[list[PartialOrder], Field(alias='Items')]
+    pagination: Annotated[
+        PartialOrdersResponsePagination,
+        Field(alias='Pagination'),
+    ]
+
+
+def parse_partial_orders_response(
+    response: httpx.Response,
+) -> PartialOrdersResponse:
+    try:
+        response_data = response.json()
+        partial_orders_response = PartialOrdersResponse.model_validate(
+            response_data,
+        )
+    except (json.JSONDecodeError, ValidationError) as error:
+        raise
+
+    return partial_orders_response
+
+
+class CountryCode(StrEnum):
+    RU = auto()
+
+
+class SalesChannel(StrEnum):
+    DELIVERY = auto()
+    DINE_IN = auto()
+
+
+class DetailedOrderDelivery(BaseModel):
+    courier: Annotated[Any | None, Field(validation_alias='Courier')]
+
+    @computed_field
+    @property
+    def is_courier_assigned(self) -> bool:
+        return self.courier is not None
+
+
+class DetailedOrderPayment(BaseModel):
+    price: Annotated[int, Field(validation_alias='Price')]
+
+
+class DetailedOrderHistoryItem(BaseModel):
+    date: Annotated[datetime.datetime, Field(validation_alias='Date')]
+    description: Annotated[str, Field(validation_alias='Description')]
+    user_name: Annotated[str | None, Field(validation_alias='UserName')]
+
+    @field_validator('user_name', mode='before')
+    @classmethod
+    def empty_string_to_none(cls, value: str) -> str | None:
+        return None if value == '' else value
+
+
+class DetailedOrderClient(BaseModel):
+    phone: Annotated[str | None, Field(validation_alias='Phone')]
+
+
+class DetailedOrder(BaseModel):
+    id: Annotated[UUID, Field(validation_alias='Id')]
+    account_name: str
+    courier_needed: Annotated[bool, Field(validation_alias='CourierNeeded')]
+    history: Annotated[
+        list[DetailedOrderHistoryItem],
+        Field(validation_alias='History'),
+    ]
+    number: Annotated[str, Field(validation_alias='Number')]
+    payment: Annotated[DetailedOrderPayment, Field(validation_alias='Payment')]
+    delivery: Annotated[
+        DetailedOrderDelivery,
+        Field(validation_alias='Delivery'),
+    ]
+    client: Annotated[DetailedOrderClient, Field(validation_alias='Client')]
+
+    @property
+    def created_at(self) -> datetime.datetime | None:
+        date: datetime.datetime | None = None
+        for item in self.history:
+            if date is None or item.date < date:
+                date = item.date
+        return date
+
+    @computed_field
+    @property
+    def sales_channel(self) -> SalesChannel:
+        return (
+            SalesChannel.DELIVERY if self.courier_needed
+            else SalesChannel.DINE_IN
+        )
+
+    @computed_field
+    @property
+    def is_refund_receipt_printed(self) -> bool:
+        for item in self.history:
+            if 'закрыт чек на возврат' in item.description.lower():
+                return True
+        return False
+
+    @computed_field
+    @property
+    def is_canceled_by_employee(self) -> bool:
+        for item in self.history:
+            is_order_canceled_item = (
+                'has been rejected' in item.description.lower()
+            )
+            has_user_name = item.user_name is not None
+            if is_order_canceled_item and has_user_name:
+                return True
+
+        return False
+
+
+def filter_valid_canceled_orders(
+    orders: Iterable[DetailedOrder],
+) -> list[DetailedOrder]:
+    result: list[DetailedOrder] = []
+    for order in orders:
+        if order.sales_channel == SalesChannel.DINE_IN and order.is_canceled_by_employee:
+            result.append(order)
+        if order.sales_channel == SalesChannel.DELIVERY and order.delivery.is_courier_assigned:
+            result.append(order)
+    return result
+
+
+def parse_detailed_order_response(
+    response: httpx.Response,
+    account_name: str,
+) -> DetailedOrder:
+    try:
+        response_data = response.json()
+        response_data |= {'account_name': account_name}
+        return DetailedOrder.model_validate(response_data)
+    except (json.JSONDecodeError, ValidationError) as error:
+        raise

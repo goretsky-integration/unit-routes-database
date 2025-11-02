@@ -6,7 +6,8 @@ from accounts.models import AccountCookies
 from accounts.services.crypt import decrypt_dict
 from reports.services import (
     get_dodo_is_shift_manager_http_client,
-    DodoIsShiftManagerGateway,
+    DodoIsShiftManagerGateway, parse_partial_orders_response,
+    parse_detailed_order_response, filter_valid_canceled_orders,
 )
 from units.models import Unit
 
@@ -39,12 +40,33 @@ class CreateCanceledOrdersReportUseCase:
                         unit.shift_manager_account_name,
                     )
                     continue
-                encrypted_cookies = account_name_to_cookies[unit.shift_manager_account_name]
+                encrypted_cookies = account_name_to_cookies[
+                    unit.shift_manager_account_name]
                 cookies = decrypt_dict(encrypted_cookies)
 
                 gateway = DodoIsShiftManagerGateway(
                     http_client=http_client,
                 )
-                orders_response = gateway.get_partial_orders(cookies=cookies, date=self.date)
+                orders_response = gateway.get_partial_orders(
+                    cookies=cookies, date=self.date,
+                )
 
-                print(orders_response.text)
+                partial_orders = parse_partial_orders_response(orders_response)
+
+                detailed_orders = []
+                for order in partial_orders.items:
+                    detailed_order_response = gateway.get_detailed_order(
+                        cookies=cookies,
+                        order_id=order.id,
+                    )
+                    detailed_order = parse_detailed_order_response(
+                        response=
+                        detailed_order_response,
+                        account_name=unit.shift_manager_account_name,
+                    )
+                    detailed_orders.append(detailed_order)
+
+                detailed_orders = filter_valid_canceled_orders(detailed_orders)
+
+                print(detailed_orders)
+
