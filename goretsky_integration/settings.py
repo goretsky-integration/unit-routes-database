@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from environ import Env
 from sentry_sdk.integrations.django import DjangoIntegration
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = Env()
@@ -124,7 +125,9 @@ LOCALE_PATHS = [
 ]
 
 SENTRY_DSN = env.str('SENTRY_DSN', default=None)
-SENTRY_TRACES_SAMPLE_RATE = env.float('SENTRY_TRACES_SAMPLE_RATE', default=None)
+SENTRY_TRACES_SAMPLE_RATE = env.float(
+    'SENTRY_TRACES_SAMPLE_RATE', default=None,
+)
 
 if SENTRY_DSN is not None and SENTRY_TRACES_SAMPLE_RATE is not None:
     sentry_sdk.init(
@@ -147,3 +150,5 @@ CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN')
+
+GOOGLE_SHEETS_CREDENTIALS = BASE_DIR / 'google_sheets_credentials.json'

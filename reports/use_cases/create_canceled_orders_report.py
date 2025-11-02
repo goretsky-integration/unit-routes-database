@@ -8,6 +8,7 @@ from reports.services import (
     get_dodo_is_shift_manager_http_client,
     DodoIsShiftManagerGateway, parse_partial_orders_response,
     parse_detailed_order_response, filter_valid_canceled_orders,
+    get_canceled_orders_spreadsheet, CanceledOrdersGoogleSheetsGateway,
 )
 from units.models import Unit
 
@@ -30,6 +31,15 @@ class CreateCanceledOrdersReportUseCase:
             account_cookies.name: account_cookies.encrypted_cookies
             for account_cookies in accounts_cookies
         }
+        spreadsheet = get_canceled_orders_spreadsheet()
+        worksheets = spreadsheet.worksheets(exclude_hidden=True)
+        google_sheets_gateway = CanceledOrdersGoogleSheetsGateway(
+            worksheets=worksheets,
+            account_name_to_unit_name={
+                unit.shift_manager_account_name: unit.name
+                for unit in units
+            }
+        )
 
         with get_dodo_is_shift_manager_http_client() as http_client:
             for unit in units:
@@ -68,5 +78,5 @@ class CreateCanceledOrdersReportUseCase:
 
                 detailed_orders = filter_valid_canceled_orders(detailed_orders)
 
-                print(detailed_orders)
-
+                for order in detailed_orders:
+                    google_sheets_gateway.append_order(order)
