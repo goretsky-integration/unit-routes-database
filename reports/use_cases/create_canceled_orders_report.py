@@ -25,14 +25,14 @@ class CreateCanceledOrdersReportUseCase:
         }
 
         for account_cookies in accounts_cookies:
-            if account_cookies.account.name not in account_name_to_unit:
+            if account_cookies.name not in account_name_to_unit:
                 logger.warning(
                     "No unit found for account: %s",
-                    account_cookies.account.name
+                    account_cookies.name
                 )
                 continue
 
-            unit = account_name_to_unit[account_cookies.account.name]
+            unit = account_name_to_unit[account_cookies.name]
             cookies = decrypt_dict(account_cookies.encrypted_cookies)
 
             print(unit, cookies)
