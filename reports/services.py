@@ -309,11 +309,11 @@ CANCELED_ORDER_STATE_ID: Final[int] = 12
 
 @contextlib.contextmanager
 def get_dodo_is_shift_manager_http_client(
-) -> Generator[DodoIsShiftManagerHttpClient]:
+) -> Generator[DodoIsShiftManagerHttpClient, None, None]:
     base_url = f'https://shiftmanager.dodopizza.ru/'
     headers = {'User-Agent': 'Goretsky-Band'}
 
-    with httpx.AsyncClient(
+    with httpx.Client(
         headers=headers,
         base_url=base_url,
     ) as http_client:
