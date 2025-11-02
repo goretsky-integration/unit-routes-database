@@ -226,7 +226,8 @@ class OfficeManagerAccountAuthenticator:
                 account_login_form_data=filled_account_login_form_data,
             ))
         sign_in_oidc_form_data = parse_sign_in_oidc_form_data(
-            sign_in_oidc_form_html=sign_in_oidc_form_html
+            sign_in_oidc_form_html=sign_in_oidc_form_html,
+            scope=connect_authorize_form_data.scope,
         )
         return self.__office_manager_service.send_sign_in_oidc_form_data(
             sign_in_oidc_form_data=sign_in_oidc_form_data
