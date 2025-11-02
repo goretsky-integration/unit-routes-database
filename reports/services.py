@@ -316,6 +316,7 @@ def get_dodo_is_shift_manager_http_client(
     with httpx.Client(
         headers=headers,
         base_url=base_url,
+        follow_redirects=True,
     ) as http_client:
         yield DodoIsShiftManagerHttpClient(http_client)
 
