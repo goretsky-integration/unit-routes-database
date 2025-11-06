@@ -168,6 +168,55 @@ class StaffMembersBirthdaysResponse(BaseModel):
     ]
 
 
+class SalesChannel(StrEnum):
+    DINE_IN = 'Dine-in'
+    TAKEAWAY = 'Takeaway'
+    DELIVERY = 'Delivery'
+
+
+class ChannelStopType(StrEnum):
+    COMPLETE = 'Complete'
+    REDIRECTION = 'Redirection'
+
+
+class StopSaleBySalesChannel(BaseModel):
+    id: UUID
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    unit_name: Annotated[str, Field(validation_alias='unitName')]
+    sales_channel: Annotated[
+        SalesChannel,
+        Field(validation_alias='salesChannel'),
+    ]
+    reason: str
+    started_at_local: Annotated[
+        datetime.datetime,
+        Field(validation_alias='startedAtLocal'),
+    ]
+    ended_at_local: Annotated[
+        datetime.datetime | None,
+        Field(validation_alias='endedAtLocal'),
+    ]
+    stopped_by_user_id: Annotated[
+        UUID,
+        Field(validation_alias='stoppedByUserId'),
+    ]
+    resumed_by_user_id: Annotated[
+        UUID | None,
+        Field(validation_alias='resumedByUserId'),
+    ]
+    channel_stop_type: Annotated[
+        ChannelStopType,
+        Field(validation_alias='channelStopType'),
+    ]
+
+
+class StopSalesBySalesChannelsResponse(BaseModel):
+    stop_sales: Annotated[
+        list[StopSaleBySalesChannel],
+        Field(validation_alias='stopSalesBySalesChannels'),
+    ]
+
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class DodoIsApiGateway:
     batch_size: ClassVar[int] = 30
@@ -178,6 +227,61 @@ class DodoIsApiGateway:
         unit_ids: Iterable[UUID],
     ) -> list[tuple[UUID, ...]]:
         return list(batched(unit_ids, n=self.batch_size))
+
+    def get_stop_sales_by_sales_channels(
+        self,
+        *,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        unit_ids: Iterable[UUID],
+        max_retries: int = 5,
+    ) -> list[StopSaleBySalesChannel]:
+        url = '/production/stop-sales-channels'
+        stop_sales: list[StopSaleBySalesChannel] = []
+
+        for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
+            for attempt in range(1, max_retries + 1):
+                response = self.http_client.get(
+                    url=url,
+                    params={
+                        'units': join_unit_ids_with_comma(unit_ids_batch),
+                        'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                        'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                    },
+                )
+
+                if response.is_server_error:
+                    logger.warning(
+                        "Server error (%s) on attempt %d/%d for units %s",
+                        response.status_code,
+                        attempt,
+                        max_retries,
+                        unit_ids_batch,
+                    )
+                    if attempt < max_retries:
+                        continue
+                    else:
+                        logger.error(
+                            "Max retries reached for units %s (last status: %s)",
+                            unit_ids_batch,
+                            response.status_code,
+                        )
+                        break
+
+                try:
+                    stop_sales_response = StopSalesBySalesChannelsResponse.model_validate_json(
+                        response.text,
+                    )
+                except ValidationError:
+                    logger.exception(
+                        "Failed to parse birthdays response for unit ids: %s",
+                        unit_ids_batch,
+                    )
+                    break
+                else:
+                    stop_sales.extend(stop_sales_response.stop_sales)
+
+        return stop_sales
 
     def get_staff_members_birthdays(
         self,
