@@ -3,10 +3,14 @@ from dataclasses import dataclass
 from accounts.models import AccountTokens
 from accounts.services.crypt import decrypt_string
 from reports.models.report_routes import ReportRoute
-from reports.services import (
-    get_dodo_is_api_gateway, Period,
-    filter_stop_sales_by_sales_channels, format_stop_sale_by_sales_channel,
+from reports.services.filters.stop_sales import (
+    filter_stop_sales_by_sales_channels,
 )
+from reports.services.formatters.stop_sales import (
+    format_stop_sale_by_sales_channel,
+)
+from reports.services.gateways.dodo_is_api import get_dodo_is_api_gateway
+from reports.services.period import Period
 from telegram.services import batch_create_telegram_messages
 from units.models import Unit
 

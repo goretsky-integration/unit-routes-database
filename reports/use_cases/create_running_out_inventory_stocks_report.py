@@ -3,13 +3,15 @@ from dataclasses import dataclass
 from accounts.models import AccountTokens
 from accounts.services.crypt import decrypt_string
 from reports.models.report_routes import ReportRoute
-from reports.services import (
-    get_dodo_is_api_gateway,
-    filter_running_out_stock_items,
+from reports.services.filters.inventory_stocks import (
     filter_relevant_items,
-    group_inventory_stocks,
-    format_running_out_stock_items, get_empty_units_inventory_stocks,
+    filter_running_out_stock_items, get_empty_units_inventory_stocks,
 )
+from reports.services.formatters.inventory_stocks import \
+    (
+    group_inventory_stocks, format_running_out_stock_items,
+)
+from reports.services.gateways.dodo_is_api import get_dodo_is_api_gateway
 from telegram.services import batch_create_telegram_messages
 from units.models import Unit
 

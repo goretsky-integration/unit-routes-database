@@ -10,15 +10,17 @@ from reports.selectors import (
     get_report_routes_by_report_type_id_and_unit_id,
     get_report_type_by_id,
 )
-from reports.services import create_report_routes, delete_report_routes
+from reports.services.report_routes import (
+    create_report_routes,
+    delete_report_routes,
+)
 from telegram.selectors import (
     get_telegram_chat_with_scope_by_chat_id,
-    get_telegram_chat_by_chat_id
+    get_telegram_chat_by_chat_id,
 )
 
 
 class ReportRoutesUnitsListApi(APIView):
-
     class InputSerializer(LimitOffsetSerializer):
         report_type_id = serializers.IntegerField(min_value=1)
         chat_id = serializers.IntegerField()
@@ -54,11 +56,9 @@ class ReportRoutesUnitsListApi(APIView):
 
 
 class ReportRoutesChatIdsListApi(APIView):
-
     class InputSerializer(LimitOffsetSerializer):
         report_type_id = serializers.IntegerField(min_value=1)
         unit_id = serializers.IntegerField(min_value=1)
-
 
     def get(self, request: Request):
         serializer = self.InputSerializer(data=request.query_params)
@@ -96,7 +96,6 @@ class ReportRoutesChatIdsListApi(APIView):
 
 
 class ReportRoutesCreateDeleteApi(APIView):
-
     class InputSerializer(serializers.Serializer):
         report_type_id = serializers.IntegerField()
         user_chat_id = serializers.IntegerField()
@@ -129,7 +128,7 @@ class ReportRoutesCreateDeleteApi(APIView):
             raise PermissionDeniedError('Permission to report type denied')
 
         unit_ids_with_access: set[int] = set(
-            units_with_access.values_list('id', flat=True)
+            units_with_access.values_list('id', flat=True),
         )
         requested_unit_ids_with_access: set[int] = {
             unit_id for unit_id in requested_unit_ids
@@ -139,7 +138,7 @@ class ReportRoutesCreateDeleteApi(APIView):
 
         if permission_denied_units:
             raise PermissionDeniedError(
-                f'Permission to units {permission_denied_units} denied'
+                f'Permission to units {permission_denied_units} denied',
             )
 
         chat = get_telegram_chat_by_chat_id(chat_id)

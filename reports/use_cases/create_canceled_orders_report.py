@@ -4,11 +4,20 @@ from dataclasses import dataclass
 
 from accounts.models import AccountCookies
 from accounts.services.crypt import decrypt_dict
-from reports.services import (
+from reports.services.filters.canceled_orders import (
+    filter_valid_canceled_orders,
+)
+from reports.services.gateways.google_sheets import (
+    get_canceled_orders_spreadsheet,
+    CanceledOrdersGoogleSheetsGateway,
+)
+from reports.services.gateways.shift_manager import (
     get_dodo_is_shift_manager_http_client,
-    DodoIsShiftManagerGateway, parse_partial_orders_response,
-    parse_detailed_order_response, filter_valid_canceled_orders,
-    get_canceled_orders_spreadsheet, CanceledOrdersGoogleSheetsGateway,
+    DodoIsShiftManagerGateway,
+    parse_partial_orders_response,
+)
+from reports.services.parsers.canceled_orders import (
+    parse_detailed_order_response,
 )
 from units.models import Unit
 
@@ -38,7 +47,7 @@ class CreateCanceledOrdersReportUseCase:
             account_name_to_unit_name={
                 unit.shift_manager_account_name: unit.name
                 for unit in units
-            }
+            },
         )
 
         with get_dodo_is_shift_manager_http_client() as http_client:
