@@ -10,5 +10,5 @@ def format_feedback(feedback: OrderFeedback, unit_name: str) -> str:
         f"<b>Заказ №{feedback.order_number}</b>\n"
         f"Время заказа: <b>{feedback.order_created_at:%d.%m.%Y %H:%M}</b>\n"
         f"Оценка: <b>{feedback.order_rate}</b> {exclamation}\n"
-        f"Комментарий: <b>{feedback.feedback_comment}</b>"
+        f"Комментарий: <b>{feedback.feedback_comment or 'отсутствует'}</b>"
     )
