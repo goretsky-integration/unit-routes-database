@@ -219,6 +219,37 @@ class OrderFeedbacksResponse(BaseModel):
     ]
 
 
+class StopSaleBySector(BaseModel):
+    id: Annotated[UUID, Field(validation_alias='id')]
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    unit_name: Annotated[str, Field(validation_alias='unitName')]
+    sector_name: Annotated[str, Field(validation_alias='sectorName')]
+    is_sub_sector: Annotated[bool, Field(validation_alias='isSubSector')]
+    started_at_utc: Annotated[
+        datetime.datetime,
+        Field(validation_alias='startedAtLocal')
+    ]
+    ended_at_utc: Annotated[
+        datetime.datetime | None,
+        Field(validation_alias='endedAtLocal'),
+    ]
+    stopped_by_user_id: Annotated[
+        UUID | None,
+        Field(validation_alias='suspendedByUserId'),
+    ]
+    resumed_by_user_id: Annotated[
+        UUID | None,
+        Field(validation_alias='resumedByUserId'),
+    ]
+
+
+class StopSalesBySectorsResponse(BaseModel):
+    stop_sales: Annotated[
+        list[StopSaleBySector],
+        Field(validation_alias='stopSalesBySectors'),
+    ]
+
+
 @contextlib.contextmanager
 def get_dodo_is_api_http_client(
     access_token: str,
@@ -278,6 +309,47 @@ class DodoIsApiGateway:
             except ValidationError:
                 logger.exception(
                     "Failed to parse stop sales by ingredients response for unit ids: %s",
+                    unit_ids_batch,
+                )
+                break
+            else:
+                stop_sales.extend(stop_sales_response.stop_sales)
+
+        return stop_sales
+
+    def get_stop_sales_by_sectors(
+        self,
+        *,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        unit_ids: Iterable[UUID],
+    ) -> list[StopSaleBySector]:
+        url = '/ru/delivery/stop-sales-sectors'
+        stop_sales: list[StopSaleBySector] = []
+
+        for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params={
+                    'units': join_unit_ids_with_comma(unit_ids_batch),
+                    'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                    'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                },
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get stop sales by sectors for units %s. No response.',
+                    unit_ids_batch,
+                )
+                break
+
+            try:
+                stop_sales_response = StopSalesBySectorsResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse stop sales by sectors response for unit ids: %s",
                     unit_ids_batch,
                 )
                 break
