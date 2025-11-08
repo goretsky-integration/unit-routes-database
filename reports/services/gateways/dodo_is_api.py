@@ -398,6 +398,33 @@ class DodoIsApiGateway:
 
         return staff_birthdays
 
+    def _try_send_request_with_server_error_handling(
+        self,
+        url: str,
+        params: dict[str, str | int],
+        max_retries: int = 5,
+    ) -> httpx.Response | None:
+        for attempt in range(1, max_retries + 1):
+            response = self.http_client.get(url=url, params=params)
+
+            if response.is_server_error:
+                logger.warning(
+                    "Server error (%s) on attempt %d/%d for params",
+                    response.status_code,
+                    attempt,
+                    max_retries,
+                    params,
+                )
+                if attempt < max_retries:
+                    continue
+                else:
+                    logger.error("Max retries reached")
+                    break
+
+            return response
+
+        return None
+
     def get_inventory_stocks(
         self,
         *,
@@ -409,54 +436,38 @@ class DodoIsApiGateway:
         inventory_stocks: list[InventoryStockItem] = []
 
         for unit_ids_batch in batched(unit_ids, n=self.batch_size):
-            is_end_of_list_reached: bool = False
             for skip in range(0, 100_000, take):
-                if is_end_of_list_reached:
+                response = self._try_send_request_with_server_error_handling(
+                    url=url,
+                    params={
+                        'units': join_unit_ids_with_comma(unit_ids_batch),
+                        'take': take,
+                        'skip': skip,
+                    },
+                    max_retries=max_retries,
+                )
+
+                if response is None:
+                    logger.error(
+                        'Failed to get inventory stocks for units %s. No response.',
+                        unit_ids_batch,
+                    )
                     break
 
-                for attempt in range(1, max_retries + 1):
-                    response = self.http_client.get(
-                        url=url,
-                        params={
-                            'units': join_unit_ids_with_comma(unit_ids_batch),
-                            'take': take,
-                            'skip': skip,
-                        },
+                try:
+                    inventory_stocks_response = InventoryStocksResponse.model_validate_json(
+                        response.text,
                     )
-
-                    if response.is_server_error:
-                        logger.warning(
-                            "Server error (%s) on attempt %d/%d for units %s",
-                            response.status_code,
-                            attempt,
-                            max_retries,
-                            unit_ids_batch,
-                        )
-                        if attempt < max_retries:
-                            continue
-                        else:
-                            logger.error(
-                                "Max retries reached for units %s (last status: %s)",
-                                unit_ids_batch,
-                                response.status_code,
-                            )
-                            break
-
-                    try:
-                        inventory_stocks_response = InventoryStocksResponse.model_validate_json(
-                            response.text,
-                        )
-                    except ValidationError:
-                        logger.exception(
-                            "Failed to parse inventory stocks response for unit ids: %s",
-                            unit_ids_batch,
-                        )
+                except ValidationError:
+                    logger.exception(
+                        "Failed to parse inventory stocks response for unit ids: %s",
+                        unit_ids_batch,
+                    )
+                    break
+                else:
+                    inventory_stocks += inventory_stocks_response.stocks
+                    if inventory_stocks_response.is_end_of_list_reached:
                         break
-                    else:
-                        inventory_stocks += inventory_stocks_response.stocks
-                        if inventory_stocks_response.is_end_of_list_reached:
-                            is_end_of_list_reached = True
-                            break
 
         return inventory_stocks
 
