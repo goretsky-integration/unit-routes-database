@@ -1,8 +1,7 @@
 import datetime
 from dataclasses import dataclass
 from typing import Self
-
-from django.utils import timezone
+from zoneinfo import ZoneInfo
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -11,8 +10,8 @@ class Period:
     end: datetime.datetime
 
     @classmethod
-    def today_to_this_time(cls) -> Self:
-        now = timezone.localtime() + datetime.timedelta(hours=3)
+    def today_to_this_time(cls, timezone: ZoneInfo | None = None) -> Self:
+        now = datetime.datetime.now(timezone)
         return cls(
             start=now.replace(
                 hour=0,
@@ -24,8 +23,8 @@ class Period:
         )
 
     @classmethod
-    def today_full_day(cls) -> Self:
-        now = timezone.localtime()
+    def today_full_day(cls, timezone: ZoneInfo | None = None) -> Self:
+        now = datetime.datetime.now(timezone)
         return cls(
             start=now.replace(
                 hour=0,
@@ -42,8 +41,8 @@ class Period:
         )
 
     @classmethod
-    def yesterday_to_this_time(cls) -> Self:
-        today = cls.today_to_this_time()
+    def yesterday_to_this_time(cls, timezone: ZoneInfo | None = None) -> Self:
+        today = cls.today_to_this_time(timezone)
         return cls(
             start=today.start - datetime.timedelta(days=1),
             end=today.end - datetime.timedelta(days=1),

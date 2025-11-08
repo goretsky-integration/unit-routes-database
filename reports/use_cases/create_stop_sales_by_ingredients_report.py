@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from zoneinfo import ZoneInfo
+
 from accounts.models import AccountTokens
 from accounts.services.crypt import decrypt_string
 from reports.models.report_routes import ReportRoute
@@ -13,10 +16,13 @@ from telegram.services import batch_create_telegram_messages
 from units.models import Unit
 
 
+@dataclass(frozen=True, slots=True, kw_only=True)
 class CreateStopSalesByAllIngredientsReport:
+    timezone = ZoneInfo('Europe/Moscow')
+
     def execute(self) -> None:
         accounts_tokens = AccountTokens.objects.select_related('account').all()
-        today = Period.today_to_this_time()
+        today = Period.today_to_this_time(self.timezone)
 
         for account_token in accounts_tokens:
             units = Unit.objects.filter(
