@@ -1,5 +1,3 @@
-from collections.abc import Iterable
-
 from redis import Redis
 
 from accounts.models import AccountTokens
