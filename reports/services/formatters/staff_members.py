@@ -75,7 +75,8 @@ def format_birthday_congratulations(
     lines = ['<b>Банда, сегодня свой день рождения празднуют:</b>\n']
 
     for employee_birthday in birthdays:
-        name = clean_staff_member_full_name(employee_birthday.full_name)
+        full_name = f'{employee_birthday.last_name} {employee_birthday.first_name}'
+        name = clean_staff_member_full_name(full_name)
         unit_name = employee_birthday.unit_name
 
         lines.append(f'🎁 {name} из пиццерии {unit_name}')
