@@ -228,7 +228,7 @@ def get_dodo_is_api_http_client(
         headers={
             'Authorization': f'Bearer {access_token}',
         },
-        base_url='https://api.dodois.io/dodopizza/ru/',
+        base_url='https://api.dodois.io/dodopizza/',
         timeout=timeout,
     ) as http_client:
         yield DodoIsApiHttpClient(http_client)
@@ -252,7 +252,7 @@ class DodoIsApiGateway:
         date_to: datetime.datetime,
         unit_ids: Iterable[UUID],
     ) -> list[StopSaleByIngredient]:
-        url = '/production/stop-sales-ingredients'
+        url = '/ru/production/stop-sales-ingredients'
         stop_sales: list[StopSaleByIngredient] = []
 
         for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
@@ -293,7 +293,7 @@ class DodoIsApiGateway:
         date_to: datetime.datetime,
         unit_ids: Iterable[UUID],
     ) -> list[StopSaleBySalesChannel]:
-        url = '/production/stop-sales-channels'
+        url = '/ru/production/stop-sales-channels'
         stop_sales: list[StopSaleBySalesChannel] = []
 
         for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
@@ -336,7 +336,7 @@ class DodoIsApiGateway:
         month_to: int,
         unit_ids: Iterable[UUID],
     ) -> list[StaffMemberBirthday]:
-        url = '/staff/members/birthdays'
+        url = '/ru/staff/members/birthdays'
         staff_birthdays: list[StaffMemberBirthday] = []
         take: int = 100
 
@@ -411,7 +411,7 @@ class DodoIsApiGateway:
         unit_ids: Iterable[UUID],
     ) -> list[InventoryStockItem]:
         take: int = 1000
-        url = '/accounting/inventory-stocks'
+        url = '/ru/accounting/inventory-stocks'
         inventory_stocks: list[InventoryStockItem] = []
 
         for unit_ids_batch in batched(unit_ids, n=self.batch_size):
