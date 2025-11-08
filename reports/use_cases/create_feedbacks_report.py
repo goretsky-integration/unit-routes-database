@@ -61,6 +61,7 @@ class CreateFeedbacksReport:
                     dodo_is_api_account_name=account_token.account.name,
                 )
                 unit_ids = {unit.uuid for unit in units}
+                unit_id_to_name = {unit.uuid: unit.name for unit in units}
 
                 access_token = decrypt_string(
                     account_token.encrypted_access_token,
@@ -77,7 +78,8 @@ class CreateFeedbacksReport:
                 feedbacks = feedbacks_filter.filter(feedbacks)
 
                 for feedback in feedbacks:
-                    text = format_feedback(feedback)
+                    unit_name = unit_id_to_name.get(feedback.unit_id, '?')
+                    text = format_feedback(feedback, unit_name)
                     chat_ids = (
                         ReportRoute.objects
                         .filter(
