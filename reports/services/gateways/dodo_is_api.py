@@ -148,6 +148,51 @@ class StopSalesBySalesChannelsResponse(BaseModel):
     ]
 
 
+class IngredientCategoryName(StrEnum):
+    INGREDIENT = 'Ingredient'
+    SEMI_FINISHED_PRODUCT = 'SemiFinishedProduct'
+    FINISHED_PRODUCT = 'FinishedProduct'
+    INVENTORY = 'Inventory'
+    PACKING = 'Packing'
+    CONSUMABLES = 'Consumables'
+
+
+class StopSaleByIngredient(BaseModel):
+    id: UUID
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    unit_name: Annotated[str, Field(validation_alias='unitName')]
+    ingredient_id: Annotated[UUID, Field(validation_alias='ingredientId')]
+    ingredient_name: Annotated[str, Field(validation_alias='ingredientName')]
+    ingredient_category_name: Annotated[
+        IngredientCategoryName,
+        Field(validation_alias='ingredientCategoryName'),
+    ]
+    reason: str
+    started_at_local: Annotated[
+        datetime.datetime,
+        Field(validation_alias='startedAtLocal'),
+    ]
+    ended_at_local: Annotated[
+        datetime.datetime | None,
+        Field(validation_alias='endedAtLocal'),
+    ]
+    stopped_by_user_id: Annotated[
+        UUID,
+        Field(validation_alias='stoppedByUserId'),
+    ]
+    resumed_by_user_id: Annotated[
+        UUID | None,
+        Field(validation_alias='resumedByUserId'),
+    ]
+
+
+class StopSalesByIngredientsResponse(BaseModel):
+    stop_sales: Annotated[
+        list[StopSaleByIngredient],
+        Field(validation_alias='stopSalesByIngredients'),
+    ]
+
+
 @contextlib.contextmanager
 def get_dodo_is_api_http_client(
     access_token: str,
@@ -173,6 +218,61 @@ class DodoIsApiGateway:
         unit_ids: Iterable[UUID],
     ) -> list[tuple[UUID, ...]]:
         return list(batched(unit_ids, n=self.batch_size))
+
+    def get_stop_sales_by_ingredients(
+        self,
+        *,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        unit_ids: Iterable[UUID],
+        max_retries: int = 5,
+    ) -> list[StopSaleByIngredient]:
+        url = '/production/stop-sales-ingredients'
+        stop_sales: list[StopSaleByIngredient] = []
+
+        for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
+            for attempt in range(1, max_retries + 1):
+                response = self.http_client.get(
+                    url=url,
+                    params={
+                        'units': join_unit_ids_with_comma(unit_ids_batch),
+                        'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                        'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                    },
+                )
+
+                if response.is_server_error:
+                    logger.warning(
+                        "Server error (%s) on attempt %d/%d for units %s",
+                        response.status_code,
+                        attempt,
+                        max_retries,
+                        unit_ids_batch,
+                    )
+                    if attempt < max_retries:
+                        continue
+                    else:
+                        logger.error(
+                            "Max retries reached for units %s (last status: %s)",
+                            unit_ids_batch,
+                            response.status_code,
+                        )
+                        break
+
+                try:
+                    stop_sales_response = StopSalesByIngredientsResponse.model_validate_json(
+                        response.text,
+                    )
+                except ValidationError:
+                    logger.exception(
+                        "Failed to parse stop sales by ingredients response for unit ids: %s",
+                        unit_ids_batch,
+                    )
+                    break
+                else:
+                    stop_sales.extend(stop_sales_response.stop_sales)
+
+        return stop_sales
 
     def get_stop_sales_by_sales_channels(
         self,
@@ -220,7 +320,7 @@ class DodoIsApiGateway:
                     )
                 except ValidationError:
                     logger.exception(
-                        "Failed to parse birthdays response for unit ids: %s",
+                        "Failed to parse stop sales by sales channels response for unit ids: %s",
                         unit_ids_batch,
                     )
                     break

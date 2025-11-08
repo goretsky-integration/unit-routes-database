@@ -1,12 +1,16 @@
 import datetime
+from collections import defaultdict
+from collections.abc import Iterable
+from dataclasses import dataclass
 from typing import TypeAlias, Final
+from uuid import UUID
 
 import humanize
 from django.utils import timezone
 
 from reports.services.gateways.dodo_is_api import (
     StopSaleBySalesChannel,
-    SalesChannel,
+    SalesChannel, StopSaleByIngredient,
 )
 
 
@@ -131,3 +135,84 @@ def format_stop_sale_by_sales_channel(
         f'Тип продажи: {channel_name}\n'
         f'Причина: {stop_sale.reason}'
     )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class StopSalesByIngredientsGroupedByUnitId:
+    unit_id: UUID
+    stop_sales: Iterable[StopSaleByIngredient]
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class StopSalesByIngredientsGroupedByReason:
+    reason: str
+    stop_sales: Iterable[StopSaleByIngredient]
+
+
+def group_by_unit_id(
+    stop_sales: Iterable[StopSaleByIngredient],
+) -> list[StopSalesByIngredientsGroupedByUnitId]:
+    unit_id_to_stop_sales = defaultdict(list)
+    for stop_sale in stop_sales:
+        unit_id_to_stop_sales[stop_sale.unit_id].append(stop_sale)
+
+    return [
+        StopSalesByIngredientsGroupedByUnitId(
+            unit_id=unit_id,
+            stop_sales=stop_sales,
+        )
+        for unit_id, stop_sales in unit_id_to_stop_sales.items()
+    ]
+
+
+def group_by_reason(
+    stop_sales: Iterable[StopSaleByIngredient],
+) -> list[StopSalesByIngredientsGroupedByReason]:
+    reason_to_stop_sales = defaultdict(list)
+    for stop_sale in stop_sales:
+        reason_to_stop_sales[stop_sale.reason].append(stop_sale)
+
+    return [
+        StopSalesByIngredientsGroupedByReason(
+            reason=reason,
+            stop_sales=stop_sales,
+        )
+        for reason, stop_sales in reason_to_stop_sales.items()
+    ]
+
+
+def render_stop_sale_by_ingredient(stop_sale: StopSaleByIngredient) -> str:
+    duration = compute_duration(stop_sale.started_at)
+    humanized_stop_duration = humanize_stop_sale_duration(duration)
+    return (
+        f'📍 {stop_sale.ingredient_name}'
+        f' - <b><u>{humanized_stop_duration}</u></b>'
+    )
+
+
+def format_stop_sales_by_ingredients(
+    *,
+    unit_name: str,
+    stop_sales_by_reasons: Iterable[StopSalesByIngredientsGroupedByReason],
+) -> str:
+    lines = [f'<b>{unit_name}</b>']
+
+    if not stop_sales_by_reasons:
+        lines.append(
+            '<b>Стопов пока нет!'
+            ' Молодцы. Ваши Клиенты довольны</b>',
+        )
+
+    for stop_sales_by_reason in stop_sales_by_reasons:
+        stop_sales = sorted(
+            stop_sales_by_reason.stop_sales,
+            key=lambda stop_sale: stop_sale.started_at,
+            reverse=True,
+        )
+
+        lines.append(f'\n<b>{stop_sales_by_reason.reason}:</b>')
+        lines += [
+            render_stop_sale_by_ingredient(stop_sale)
+            for stop_sale in stop_sales
+        ]
+    return '\n'.join(lines)

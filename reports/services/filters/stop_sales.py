@@ -1,14 +1,24 @@
+import datetime
 from collections.abc import Iterable
+from typing import Protocol, TypeVar
 
 from reports.services.gateways.dodo_is_api import (
     StopSaleBySalesChannel,
-    SalesChannel, ChannelStopType,
+    SalesChannel,
+    ChannelStopType,
 )
 
 
+class HasEndedAtLocal(Protocol):
+    ended_at_local: datetime.datetime | None
+
+
+HasEndedAtLocalT = TypeVar('HasEndedAtLocalT', bound=HasEndedAtLocal)
+
+
 def filter_not_ended_stop_sales(
-    stop_sales: Iterable[StopSaleBySalesChannel],
-) -> list[StopSaleBySalesChannel]:
+    stop_sales: Iterable[HasEndedAtLocalT],
+) -> list[HasEndedAtLocalT]:
     return [
         stop_sale for stop_sale in stop_sales
         if stop_sale.ended_at_local is None
