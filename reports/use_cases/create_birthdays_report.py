@@ -44,6 +44,9 @@ class CreateEmployeeBirthdaysReport:
 
             birthdays = filter_birthdays_by_full_name(birthdays)
 
+            if not birthdays:
+                continue
+
             text = format_birthday_congratulations(birthdays)
             batch_create_telegram_messages(
                 chat_ids=[-1002038824379],
