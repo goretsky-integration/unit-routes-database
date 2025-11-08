@@ -37,7 +37,8 @@ def filter_birthdays_by_full_name(
 
     for employee_birthday in employee_birthdays:
         for employee_in_blacklist in employees_blacklist:
-            if employee_in_blacklist in employee_birthday.full_name.lower():
+            full_name = f'{employee_birthday.last_name} {employee_in_blacklist}'
+            if employee_in_blacklist in full_name.lower():
                 break
         else:
             result.append(employee_birthday)
