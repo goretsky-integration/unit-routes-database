@@ -2,15 +2,15 @@ import datetime
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import TypeAlias, Final
+from typing import TypeAlias, Final, Protocol, TypeVar, Generic
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 import humanize
-from django.utils import timezone
 
 from reports.services.gateways.dodo_is_api import (
     StopSaleBySalesChannel,
-    SalesChannel, StopSaleByIngredient,
+    SalesChannel, StopSaleByIngredient, StopSaleBySector,
 )
 
 
@@ -42,8 +42,12 @@ def abbreviate_time_units(text: str) -> str:
     return text
 
 
-def compute_duration(started_at: datetime.datetime) -> datetime.timedelta:
-    return timezone.localtime() + datetime.timedelta(hours=3) - started_at
+def compute_duration(
+    started_at: datetime.datetime,
+    *,
+    timezone: ZoneInfo | None = None,
+) -> datetime.timedelta:
+    return datetime.datetime.now(timezone) - started_at
 
 
 def humanize_stop_sale_duration(duration: datetime.timedelta) -> str:
@@ -104,8 +108,9 @@ def render_stop_sale_header(
     *,
     unit_name: str,
     started_at: datetime.datetime,
+    timezone: ZoneInfo,
 ):
-    stop_sale_duration = compute_duration(started_at)
+    stop_sale_duration = compute_duration(started_at, timezone=timezone)
     humanized_stop_sale_duration = humanize_stop_sale_duration(
         duration=stop_sale_duration,
     )
@@ -124,10 +129,13 @@ def render_stop_sale_header(
 
 def format_stop_sale_by_sales_channel(
     stop_sale: StopSaleBySalesChannel,
+    *,
+    timezone: ZoneInfo,
 ) -> str:
     header = render_stop_sale_header(
         unit_name=stop_sale.unit_name,
         started_at=stop_sale.started_at,
+        timezone=timezone,
     )
     channel_name = SALES_CHANNEL_TO_NAME[stop_sale.sales_channel]
     return (
@@ -137,10 +145,6 @@ def format_stop_sale_by_sales_channel(
     )
 
 
-@dataclass(frozen=True, slots=True, kw_only=True)
-class StopSalesByIngredientsGroupedByUnitId:
-    unit_id: UUID
-    stop_sales: Iterable[StopSaleByIngredient]
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -149,15 +153,28 @@ class StopSalesByIngredientsGroupedByReason:
     stop_sales: Iterable[StopSaleByIngredient]
 
 
+class HasUnitId(Protocol):
+    unit_id: UUID
+
+
+HasUnitIdT = TypeVar('HasUnitIdT', bound=HasUnitId)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class StopSalesGroupedByUnitId(Generic[HasUnitIdT]):
+    unit_id: UUID
+    stop_sales: Iterable[HasUnitIdT]
+
+
 def group_by_unit_id(
-    stop_sales: Iterable[StopSaleByIngredient],
-) -> list[StopSalesByIngredientsGroupedByUnitId]:
+    stop_sales: Iterable[HasUnitIdT],
+) -> list[StopSalesGroupedByUnitId]:
     unit_id_to_stop_sales = defaultdict(list)
     for stop_sale in stop_sales:
         unit_id_to_stop_sales[stop_sale.unit_id].append(stop_sale)
 
     return [
-        StopSalesByIngredientsGroupedByUnitId(
+        StopSalesGroupedByUnitId(
             unit_id=unit_id,
             stop_sales=stop_sales,
         )
@@ -215,4 +232,36 @@ def format_stop_sales_by_ingredients(
             render_stop_sale_by_ingredient(stop_sale)
             for stop_sale in stop_sales
         ]
+    return '\n'.join(lines)
+
+
+def format_stop_sales_by_sectors(
+    *,
+    unit_name: str,
+    stop_sales: Iterable[StopSaleBySector],
+    timezone: ZoneInfo,
+) -> str:
+    stop_sales = sorted(stop_sales, key=lambda stop_sale: stop_sale.started_at)
+    if len(stop_sales) == 1:
+        sector_singular_or_plural = 'сектор'
+    else:
+        sector_singular_or_plural = 'сектора'
+
+    lines = [f'<b>{unit_name} {sector_singular_or_plural} в стопе:</b>']
+
+    for stop_sale in stop_sales:
+        duration = compute_duration(stop_sale.started_at, timezone=timezone)
+        humanized_duration = humanize_stop_sale_duration(duration)
+
+        line = (
+            f'{stop_sale.sector_name}'
+            f' - {humanized_duration}'
+            f' (с {stop_sale.started_at:%H:%M})'
+        )
+
+        if is_urgent(duration):
+            line = f'❗️ {line} ❗️'
+
+        lines.append(line)
+
     return '\n'.join(lines)

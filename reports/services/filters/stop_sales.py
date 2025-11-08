@@ -9,19 +9,19 @@ from reports.services.gateways.dodo_is_api import (
 )
 
 
-class HasEndedAtLocal(Protocol):
-    ended_at_local: datetime.datetime | None
+class HasEndedAt(Protocol):
+    ended_at: datetime.datetime | None
 
 
-HasEndedAtLocalT = TypeVar('HasEndedAtLocalT', bound=HasEndedAtLocal)
+HasEndedAtT = TypeVar('HasEndedAtT', bound=HasEndedAt)
 
 
 def filter_not_ended_stop_sales(
-    stop_sales: Iterable[HasEndedAtLocalT],
-) -> list[HasEndedAtLocalT]:
+    stop_sales: Iterable[HasEndedAtT],
+) -> list[HasEndedAtT]:
     return [
         stop_sale for stop_sale in stop_sales
-        if stop_sale.ended_at_local is None
+        if stop_sale.ended_at is None
     ]
 
 

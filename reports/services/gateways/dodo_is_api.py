@@ -119,11 +119,11 @@ class StopSaleBySalesChannel(BaseModel):
         Field(validation_alias='salesChannel'),
     ]
     reason: str
-    started_at_local: Annotated[
+    started_at: Annotated[
         datetime.datetime,
         Field(validation_alias='startedAtLocal'),
     ]
-    ended_at_local: Annotated[
+    ended_at: Annotated[
         datetime.datetime | None,
         Field(validation_alias='endedAtLocal'),
     ]
@@ -168,11 +168,11 @@ class StopSaleByIngredient(BaseModel):
         Field(validation_alias='ingredientCategoryName'),
     ]
     reason: str
-    started_at_local: Annotated[
+    started_at: Annotated[
         datetime.datetime,
         Field(validation_alias='startedAtLocal'),
     ]
-    ended_at_local: Annotated[
+    ended_at: Annotated[
         datetime.datetime | None,
         Field(validation_alias='endedAtLocal'),
     ]

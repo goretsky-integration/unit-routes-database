@@ -8,7 +8,7 @@ from reports.services.filters.stop_sales import filter_not_ended_stop_sales
 from reports.services.formatters.stop_sales import (
     group_by_unit_id,
     format_stop_sales_by_ingredients, group_by_reason,
-    StopSalesByIngredientsGroupedByUnitId,
+    StopSalesGroupedByUnitId,
 )
 from reports.services.gateways.dodo_is_api import get_dodo_is_api_gateway
 from reports.services.period import Period
@@ -47,7 +47,7 @@ class CreateStopSalesByAllIngredientsReport:
             existing_stop_sales_unit_ids = {stop_sale.unit_id for stop_sale in stop_sales}
             missing_unit_ids = unit_ids - existing_stop_sales_unit_ids
             missing_stop_sales = [
-                StopSalesByIngredientsGroupedByUnitId(
+                StopSalesGroupedByUnitId(
                     unit_id=unit_id,
                     stop_sales=[],
                 )
