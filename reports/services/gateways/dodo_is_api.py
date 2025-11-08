@@ -95,7 +95,7 @@ class StaffMembersBirthdaysResponse(BaseModel):
     birthdays: list[StaffMemberBirthday]
     is_end_of_list_reached: Annotated[
         bool,
-        Field(validation_alias='IsEndOfListReached'),
+        Field(validation_alias='isEndOfListReached'),
     ]
 
 
