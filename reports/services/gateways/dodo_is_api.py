@@ -337,17 +337,17 @@ class DodoIsApiGateway:
         month_from: int,
         month_to: int,
         unit_ids: Iterable[UUID],
-        take: int = 100,
-        skip: int = 0,
         max_retries: int = 5,
     ) -> list[StaffMemberBirthday]:
         url = '/staff/members/birthdays'
         staff_birthdays: list[StaffMemberBirthday] = []
+        take: int = 1000
 
         for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
-            batch_skip = skip
-
-            while True:
+            is_end_of_list_reached: bool = False
+            for skip in range(0, 100_000, take):
+                if is_end_of_list_reached:
+                    break
                 for attempt in range(1, max_retries + 1):
                     response = self.http_client.get(
                         url=url,
@@ -358,7 +358,7 @@ class DodoIsApiGateway:
                             'monthFrom': month_from,
                             'monthTo': month_to,
                             'take': take,
-                            'skip': batch_skip,
+                            'skip': skip,
                         },
                     )
 
@@ -379,8 +379,6 @@ class DodoIsApiGateway:
                                 response.status_code,
                             )
                             break
-
-                    batch_skip += take
 
                     try:
                         birthdays_response = StaffMembersBirthdaysResponse.model_validate_json(
@@ -395,6 +393,7 @@ class DodoIsApiGateway:
                     else:
                         staff_birthdays.extend(birthdays_response.birthdays)
                         if birthdays_response.is_end_of_list_reached:
+                            is_end_of_list_reached = True
                             break
 
         return staff_birthdays
@@ -403,24 +402,25 @@ class DodoIsApiGateway:
         self,
         *,
         unit_ids: Iterable[UUID],
-        take: int = 1000,
-        skip: int = 0,
         max_retries: int = 5,
     ) -> list[InventoryStockItem]:
+        take: int = 1000
         url = '/accounting/inventory-stocks'
         inventory_stocks: list[InventoryStockItem] = []
 
         for unit_ids_batch in batched(unit_ids, n=self.batch_size):
-            batch_skip = skip
+            is_end_of_list_reached: bool = False
+            for skip in range(0, 100_000, take):
+                if is_end_of_list_reached:
+                    break
 
-            while True:
                 for attempt in range(1, max_retries + 1):
                     response = self.http_client.get(
                         url=url,
                         params={
                             'units': join_unit_ids_with_comma(unit_ids_batch),
                             'take': take,
-                            'skip': batch_skip,
+                            'skip': skip,
                         },
                     )
 
@@ -442,8 +442,6 @@ class DodoIsApiGateway:
                             )
                             break
 
-                    batch_skip += take
-
                     try:
                         inventory_stocks_response = InventoryStocksResponse.model_validate_json(
                             response.text,
@@ -457,6 +455,7 @@ class DodoIsApiGateway:
                     else:
                         inventory_stocks += inventory_stocks_response.stocks
                         if inventory_stocks_response.is_end_of_list_reached:
+                            is_end_of_list_reached = True
                             break
 
         return inventory_stocks
