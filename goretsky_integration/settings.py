@@ -152,3 +152,5 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN')
 
 GOOGLE_SHEETS_CREDENTIALS = BASE_DIR / 'google_sheets_credentials.json'
+
+REDIS_URL = env.str('DJANGO_REDIS_URL')

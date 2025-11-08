@@ -193,6 +193,32 @@ class StopSalesByIngredientsResponse(BaseModel):
     ]
 
 
+class OrderFeedback(BaseModel):
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    order_id: Annotated[UUID, Field(validation_alias='orderId')]
+    order_number: Annotated[int, Field(validation_alias='orderNumber')]
+    order_created_at: Annotated[
+        datetime.datetime,
+        Field(validation_alias='orderCreatedAt'),
+    ]
+    order_rate: Annotated[int, Field(validation_alias='orderRate')]
+    feedback_comment: Annotated[
+        str | None,
+        Field(validation_alias='feedbackComment'),
+    ]
+    feedback_created_at: Annotated[
+        datetime.datetime,
+        Field(validation_alias='feedbackCreatedAt'),
+    ]
+
+
+class OrderFeedbacksResponse(BaseModel):
+    feedbacks: Annotated[
+        list[OrderFeedback],
+        Field(validation_alias='orderFeedbacks'),
+    ]
+
+
 @contextlib.contextmanager
 def get_dodo_is_api_http_client(
     access_token: str,
@@ -422,6 +448,47 @@ class DodoIsApiGateway:
                         break
 
         return inventory_stocks
+
+    def get_recent_feedbacks(
+        self,
+        *,
+        unit_ids: Iterable[UUID],
+        include_feedbacks_with_empty_comment: bool = False,
+    ) -> list[OrderFeedback]:
+        url = '/customer-feedback/recent-feedbacks'
+
+        feedbacks: list[OrderFeedback] = []
+        for unit_ids_batch in batched(unit_ids, n=self.batch_size):
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params={
+                    'units': join_unit_ids_with_comma(unit_ids_batch),
+                    'includeFeedbacksWithEmptyComment': (
+                        include_feedbacks_with_empty_comment
+                    ),
+                },
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get recent feedbacks for units %s. No response.',
+                    unit_ids_batch,
+                )
+                break
+
+            try:
+                feedbacks_response = OrderFeedbacksResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse recent feedbacks response for unit ids: %s",
+                    unit_ids_batch,
+                )
+                break
+            else:
+                feedbacks += feedbacks_response.feedbacks
+
+        return feedbacks
 
 
 @contextlib.contextmanager
