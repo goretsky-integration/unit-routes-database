@@ -32,6 +32,8 @@ class FeedbacksFilter:
         result: list[OrderFeedback] = []
 
         for feedback in feedbacks:
+            if feedback.order_rate > 3 and not feedback.feedback_comment:
+                continue
             if not self.__redis.sismember('feedbacks', feedback.order_id.hex):
                 result.append(feedback)
                 self.__new_feedback_ids.add(feedback.order_id.hex)
@@ -92,6 +94,3 @@ class CreateFeedbacksReport:
                         chat_ids=chat_ids,
                         text=text,
                     )
-
-
-
