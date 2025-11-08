@@ -312,7 +312,7 @@ class DodoIsApiGateway:
     ) -> list[StaffMemberBirthday]:
         url = '/staff/members/birthdays'
         staff_birthdays: list[StaffMemberBirthday] = []
-        take: int = 1000
+        take: int = 100
 
         for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
             for skip in range(0, 100_000, take):
