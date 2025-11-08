@@ -225,52 +225,38 @@ class DodoIsApiGateway:
         date_from: datetime.datetime,
         date_to: datetime.datetime,
         unit_ids: Iterable[UUID],
-        max_retries: int = 5,
     ) -> list[StopSaleByIngredient]:
         url = '/production/stop-sales-ingredients'
         stop_sales: list[StopSaleByIngredient] = []
 
         for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
-            for attempt in range(1, max_retries + 1):
-                response = self.http_client.get(
-                    url=url,
-                    params={
-                        'units': join_unit_ids_with_comma(unit_ids_batch),
-                        'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
-                        'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
-                    },
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params={
+                    'units': join_unit_ids_with_comma(unit_ids_batch),
+                    'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                    'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                },
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get stop sales by ingredients for units %s. No response.',
+                    unit_ids_batch,
                 )
+                break
 
-                if response.is_server_error:
-                    logger.warning(
-                        "Server error (%s) on attempt %d/%d for units %s",
-                        response.status_code,
-                        attempt,
-                        max_retries,
-                        unit_ids_batch,
-                    )
-                    if attempt < max_retries:
-                        continue
-                    else:
-                        logger.error(
-                            "Max retries reached for units %s (last status: %s)",
-                            unit_ids_batch,
-                            response.status_code,
-                        )
-                        break
-
-                try:
-                    stop_sales_response = StopSalesByIngredientsResponse.model_validate_json(
-                        response.text,
-                    )
-                except ValidationError:
-                    logger.exception(
-                        "Failed to parse stop sales by ingredients response for unit ids: %s",
-                        unit_ids_batch,
-                    )
-                    break
-                else:
-                    stop_sales.extend(stop_sales_response.stop_sales)
+            try:
+                stop_sales_response = StopSalesByIngredientsResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse stop sales by ingredients response for unit ids: %s",
+                    unit_ids_batch,
+                )
+                break
+            else:
+                stop_sales.extend(stop_sales_response.stop_sales)
 
         return stop_sales
 
@@ -280,52 +266,38 @@ class DodoIsApiGateway:
         date_from: datetime.datetime,
         date_to: datetime.datetime,
         unit_ids: Iterable[UUID],
-        max_retries: int = 5,
     ) -> list[StopSaleBySalesChannel]:
         url = '/production/stop-sales-channels'
         stop_sales: list[StopSaleBySalesChannel] = []
 
         for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
-            for attempt in range(1, max_retries + 1):
-                response = self.http_client.get(
-                    url=url,
-                    params={
-                        'units': join_unit_ids_with_comma(unit_ids_batch),
-                        'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
-                        'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
-                    },
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params={
+                    'units': join_unit_ids_with_comma(unit_ids_batch),
+                    'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                    'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                },
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get stop sales by sales channels for units %s. No response.',
+                    unit_ids_batch,
                 )
+                break
 
-                if response.is_server_error:
-                    logger.warning(
-                        "Server error (%s) on attempt %d/%d for units %s",
-                        response.status_code,
-                        attempt,
-                        max_retries,
-                        unit_ids_batch,
-                    )
-                    if attempt < max_retries:
-                        continue
-                    else:
-                        logger.error(
-                            "Max retries reached for units %s (last status: %s)",
-                            unit_ids_batch,
-                            response.status_code,
-                        )
-                        break
-
-                try:
-                    stop_sales_response = StopSalesBySalesChannelsResponse.model_validate_json(
-                        response.text,
-                    )
-                except ValidationError:
-                    logger.exception(
-                        "Failed to parse stop sales by sales channels response for unit ids: %s",
-                        unit_ids_batch,
-                    )
-                    break
-                else:
-                    stop_sales.extend(stop_sales_response.stop_sales)
+            try:
+                stop_sales_response = StopSalesBySalesChannelsResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse stop sales by sales channels response for unit ids: %s",
+                    unit_ids_batch,
+                )
+                break
+            else:
+                stop_sales.extend(stop_sales_response.stop_sales)
 
         return stop_sales
 
@@ -337,64 +309,46 @@ class DodoIsApiGateway:
         month_from: int,
         month_to: int,
         unit_ids: Iterable[UUID],
-        max_retries: int = 5,
     ) -> list[StaffMemberBirthday]:
         url = '/staff/members/birthdays'
         staff_birthdays: list[StaffMemberBirthday] = []
         take: int = 1000
 
         for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
-            is_end_of_list_reached: bool = False
             for skip in range(0, 100_000, take):
-                if is_end_of_list_reached:
-                    break
-                for attempt in range(1, max_retries + 1):
-                    response = self.http_client.get(
-                        url=url,
-                        params={
-                            'units': join_unit_ids_with_comma(unit_ids_batch),
-                            'dayFrom': day_from,
-                            'dayTo': day_to,
-                            'monthFrom': month_from,
-                            'monthTo': month_to,
-                            'take': take,
-                            'skip': skip,
-                        },
+                response = self._try_send_request_with_server_error_handling(
+                    url=url,
+                    params={
+                        'units': join_unit_ids_with_comma(unit_ids_batch),
+                        'dayFrom': day_from,
+                        'dayTo': day_to,
+                        'monthFrom': month_from,
+                        'monthTo': month_to,
+                        'take': take,
+                        'skip': skip,
+                    },
+                )
+                if response is None:
+                    logger.error(
+                        'Failed to get staff members for units %s. No response.',
+                        unit_ids_batch,
                     )
+                    break
 
-                    if response.is_server_error:
-                        logger.warning(
-                            "Server error (%s) on attempt %d/%d for units %s",
-                            response.status_code,
-                            attempt,
-                            max_retries,
-                            unit_ids_batch,
-                        )
-                        if attempt < max_retries:
-                            continue
-                        else:
-                            logger.error(
-                                "Max retries reached for units %s (last status: %s)",
-                                unit_ids_batch,
-                                response.status_code,
-                            )
-                            break
-
-                    try:
-                        birthdays_response = StaffMembersBirthdaysResponse.model_validate_json(
-                            response.text,
-                        )
-                    except ValidationError:
-                        logger.exception(
-                            "Failed to parse birthdays response for unit ids: %s",
-                            unit_ids_batch,
-                        )
+                try:
+                    birthdays_response = StaffMembersBirthdaysResponse.model_validate_json(
+                        response.text,
+                    )
+                except ValidationError:
+                    logger.exception(
+                        "Failed to parse birthdays response for unit ids: %s",
+                        unit_ids_batch,
+                    )
+                    break
+                else:
+                    staff_birthdays.extend(birthdays_response.birthdays)
+                    if birthdays_response.is_end_of_list_reached:
                         break
-                    else:
-                        staff_birthdays.extend(birthdays_response.birthdays)
-                        if birthdays_response.is_end_of_list_reached:
-                            is_end_of_list_reached = True
-                            break
 
         return staff_birthdays
 
@@ -429,7 +383,6 @@ class DodoIsApiGateway:
         self,
         *,
         unit_ids: Iterable[UUID],
-        max_retries: int = 5,
     ) -> list[InventoryStockItem]:
         take: int = 1000
         url = '/accounting/inventory-stocks'
@@ -444,7 +397,6 @@ class DodoIsApiGateway:
                         'take': take,
                         'skip': skip,
                     },
-                    max_retries=max_retries,
                 )
 
                 if response is None:
