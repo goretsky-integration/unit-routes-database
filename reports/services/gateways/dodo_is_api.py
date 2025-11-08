@@ -76,7 +76,7 @@ class InventoryStocksResponse(BaseModel):
 
 
 def join_unit_ids_with_comma(unit_ids: Iterable[UUID]) -> str:
-    return ','.join(map(str, unit_ids))
+    return ','.join([unit_id.hex for unit_id in unit_ids])
 
 
 class StaffMemberBirthday(BaseModel):
