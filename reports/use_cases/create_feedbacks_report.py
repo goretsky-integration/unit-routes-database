@@ -15,37 +15,26 @@ from telegram.services import batch_create_telegram_messages
 from units.models import Unit
 
 
-class FeedbacksFilter:
+def is_new_feedback(
+    redis: Redis,
+    feedback: OrderFeedback,
+) -> bool:
+    key = f'feedback:{feedback.order_id.hex}'
+    if not redis.exists(key):
+        redis.set(key, '1')
+        redis.expire(key, 60 * 60 * 24 * 3)
+        return True
+    return False
 
-    def __init__(self, redis: Redis) -> None:
-        self.__redis = redis
-        self.__new_feedback_ids: set[str] = set()
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.rewrite_cache()
-
-    def filter(self, feedbacks: Iterable[OrderFeedback]) -> list[
-        OrderFeedback]:
-        result: list[OrderFeedback] = []
-
-        for feedback in feedbacks:
-            if feedback.order_rate > 3 and not feedback.feedback_comment:
-                continue
-            if not self.__redis.sismember('feedbacks', feedback.order_id.hex):
-                result.append(feedback)
-                self.__new_feedback_ids.add(feedback.order_id.hex)
-
-        return result
-
-    def rewrite_cache(self) -> None:
-        if not self.__new_feedback_ids:
-            return
-
-        self.__redis.delete('feedbacks')
-        self.__redis.sadd('feedbacks', *self.__new_feedback_ids)
+def is_appropriate_feedback(
+    feedback: OrderFeedback,
+) -> bool:
+    if feedback.order_rate <= 3:
+        return True
+    if feedback.feedback_comment:
+        return True
+    return False
 
 
 class CreateFeedbacksReport:
@@ -53,44 +42,46 @@ class CreateFeedbacksReport:
     def execute(self) -> None:
         redis = get_redis()
 
-        with FeedbacksFilter(redis) as feedbacks_filter:
-            accounts_tokens = AccountTokens.objects.select_related(
-                'account',
-            ).all()
+        accounts_tokens = AccountTokens.objects.select_related(
+            'account',
+        ).all()
 
-            for account_token in accounts_tokens:
-                units = Unit.objects.filter(
-                    dodo_is_api_account_name=account_token.account.name,
+        for account_token in accounts_tokens:
+            units = Unit.objects.filter(
+                dodo_is_api_account_name=account_token.account.name,
+            )
+            unit_ids = {unit.uuid for unit in units}
+            unit_id_to_name = {unit.uuid: unit.name for unit in units}
+
+            access_token = decrypt_string(
+                account_token.encrypted_access_token,
+            )
+
+            with get_dodo_is_api_gateway(
+                access_token=access_token,
+            ) as dodo_is_api_gateway:
+                feedbacks = dodo_is_api_gateway.get_recent_feedbacks(
+                    unit_ids=unit_ids,
+                    include_feedbacks_with_empty_comment=True,
                 )
-                unit_ids = {unit.uuid for unit in units}
-                unit_id_to_name = {unit.uuid: unit.name for unit in units}
 
-                access_token = decrypt_string(
-                    account_token.encrypted_access_token,
+            for feedback in feedbacks:
+                if not is_appropriate_feedback(feedback):
+                    continue
+                if not is_new_feedback(redis, feedback):
+                    continue
+
+                unit_name = unit_id_to_name.get(feedback.unit_id, '?')
+                text = format_feedback(feedback, unit_name)
+                chat_ids = (
+                    ReportRoute.objects
+                    .filter(
+                        report_type__name='FEEDBACKS',
+                        unit__uuid=feedback.unit_id,
+                    )
+                    .values_list('telegram_chat__chat_id', flat=True)
                 )
-
-                with get_dodo_is_api_gateway(
-                    access_token=access_token,
-                ) as dodo_is_api_gateway:
-                    feedbacks = dodo_is_api_gateway.get_recent_feedbacks(
-                        unit_ids=unit_ids,
-                        include_feedbacks_with_empty_comment=True,
-                    )
-
-                feedbacks = feedbacks_filter.filter(feedbacks)
-
-                for feedback in feedbacks:
-                    unit_name = unit_id_to_name.get(feedback.unit_id, '?')
-                    text = format_feedback(feedback, unit_name)
-                    chat_ids = (
-                        ReportRoute.objects
-                        .filter(
-                            report_type__name='FEEDBACKS',
-                            unit__uuid=feedback.unit_id,
-                        )
-                        .values_list('telegram_chat__chat_id', flat=True)
-                    )
-                    batch_create_telegram_messages(
-                        chat_ids=chat_ids,
-                        text=text,
-                    )
+                batch_create_telegram_messages(
+                    chat_ids=chat_ids,
+                    text=text,
+                )
