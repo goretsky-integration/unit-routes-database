@@ -74,17 +74,7 @@ class CreateStopSalesByNewIngredientsReport:
             stop_sales = filter_not_ended_stop_sales(stop_sales)
             stop_sales = new_stop_sales_filter.filter(stop_sales)
 
-            existing_stop_sales_unit_ids = {stop_sale.unit_id for stop_sale in stop_sales}
-            missing_unit_ids = unit_ids - existing_stop_sales_unit_ids
-            missing_stop_sales = [
-                StopSalesGroupedByUnitId(
-                    unit_id=unit_id,
-                    stop_sales=[],
-                )
-                for unit_id in missing_unit_ids
-            ]
-
-            units_stop_sales = group_by_unit_id(stop_sales) + missing_stop_sales
+            units_stop_sales = group_by_unit_id(stop_sales)
 
             for unit_stop_sales in units_stop_sales:
                 unit_name = unit_id_to_name.get(unit_stop_sales.unit_id, '?')
