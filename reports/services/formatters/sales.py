@@ -27,11 +27,11 @@ def group_sales(
     units_week_before_sales: Iterable[UnitSales],
 ) -> UnitsSalesStatistics:
     unit_id_to_today_sales: dict[UUID, float] = {
-        unit_sales.unit_id: unit_sales.total_sales_amount
+        unit_sales.unit_id: unit_sales.sales
         for unit_sales in units_today_sales
     }
     unit_id_to_week_before_sales: dict[UUID, float] = {
-        unit_sales.unit_id: unit_sales.total_sales_amount
+        unit_sales.unit_id: unit_sales.sales
         for unit_sales in units_week_before_sales
     }
 
