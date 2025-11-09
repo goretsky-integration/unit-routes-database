@@ -253,7 +253,7 @@ class StopSalesBySectorsResponse(BaseModel):
 class UnitSales(BaseModel):
     unit_id: Annotated[UUID, Field(validation_alias='unitId')]
     sales: float
-    orders_count: Annotated[int, Field(validation_alias='orderCount')]
+    orders_count: Annotated[int, Field(validation_alias='ordersCount')]
 
 
 class UnitsSalesResponse(BaseModel):
