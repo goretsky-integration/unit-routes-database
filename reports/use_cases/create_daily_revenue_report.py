@@ -41,13 +41,13 @@ class CreateDailyRevenueReportUseCase:
                 access_token=access_token,
             ) as dodo_is_api_gateway:
                 today_sales += dodo_is_api_gateway.get_units_sales_for_period(
-                    start_datetime=today.start,
-                    end_datetime=today.end,
+                    date_from=today.start,
+                    date_to=today.end,
                     unit_ids=unit_ids,
                 )
                 week_before_sales += dodo_is_api_gateway.get_units_sales_for_period(
-                    start_datetime=week_before.start,
-                    end_datetime=week_before.end,
+                    date_from=week_before.start,
+                    date_to=week_before.end,
                     unit_ids=unit_ids,
                 )
 
