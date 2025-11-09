@@ -1,5 +1,6 @@
 from collections import defaultdict
 from collections.abc import Iterable
+from dataclasses import dataclass
 from uuid import UUID
 
 from reports.services.filters.inventory_stocks import UnitInventoryStocks
@@ -17,6 +18,31 @@ MEASUREMENT_UNIT_TO_NAME = {
 }
 
 
+@dataclass(frozen=True, slots=True, kw_only=True)
+class UnitInventoryStocksBalance:
+    unit_id: UUID
+    balance_in_money: float
+
+
+def compute_balance_in_money_sum(
+    units_inventory_stocks: Iterable[UnitInventoryStocks],
+) -> list[UnitInventoryStocksBalance]:
+    result: list[UnitInventoryStocksBalance] = []
+    for unit_stocks in units_inventory_stocks:
+        balance_in_money = sum(
+            [
+                max(inventory_stock_item.balance_in_money, 0)
+                for inventory_stock_item
+                in unit_stocks.items
+            ],
+        )
+        result.append(
+            UnitInventoryStocksBalance(
+                unit_id=unit_stocks.unit_id,
+                balance_in_money=round(balance_in_money, 2),
+            ),
+        )
+    return result
 
 
 def group_inventory_stocks(
