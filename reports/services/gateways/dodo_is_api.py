@@ -250,6 +250,16 @@ class StopSalesBySectorsResponse(BaseModel):
     ]
 
 
+class UnitSales(BaseModel):
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    sales: float
+    orders_count: Annotated[int, Field(validation_alias='orderCount')]
+
+
+class UnitsSalesResponse(BaseModel):
+    result: list[UnitSales]
+
+
 @contextlib.contextmanager
 def get_dodo_is_api_http_client(
     access_token: str,
@@ -561,6 +571,47 @@ class DodoIsApiGateway:
                 feedbacks += feedbacks_response.feedbacks
 
         return feedbacks
+
+    def get_units_sales_for_period(
+        self,
+        *,
+        unit_ids: Iterable[UUID],
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+    ) -> list[UnitSales]:
+        url = "/ru/finances/sales/units"
+
+        units_sales: list[UnitSales] = []
+        for unit_ids_batch in batched(unit_ids, n=self.batch_size):
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params={
+                    'units': join_unit_ids_with_comma(unit_ids_batch),
+                    'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                    'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                },
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get units sales for units %s. No response.',
+                    unit_ids_batch,
+                )
+                break
+
+            try:
+                units_sales_response = UnitsSalesResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse units sales response for unit ids: %s",
+                    unit_ids_batch,
+                )
+                break
+            else:
+                units_sales += units_sales_response.result
+
+        return units_sales
 
 
 @contextlib.contextmanager

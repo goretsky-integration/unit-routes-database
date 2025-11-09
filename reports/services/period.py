@@ -47,3 +47,14 @@ class Period:
             start=today.start - datetime.timedelta(days=1),
             end=today.end - datetime.timedelta(days=1),
         )
+
+    @classmethod
+    def week_before_to_this_time(
+        cls,
+        timezone: ZoneInfo | None = None,
+    ) -> Self:
+        today = cls.today_to_this_time(timezone)
+        return cls(
+            start=today.start - datetime.timedelta(days=7),
+            end=today.end - datetime.timedelta(days=7),
+        )
