@@ -14,6 +14,8 @@ from reports.services.gateways.dodo_is_api import (
 )
 
 
+humanize.i18n.activate("ru_RU")
+
 SALES_CHANNEL_TO_NAME = {
     SalesChannel.DINE_IN: 'Ресторан',
     SalesChannel.TAKEAWAY: 'Самовывоз',
@@ -143,8 +145,6 @@ def format_stop_sale_by_sales_channel(
         f'Тип продажи: {channel_name}\n'
         f'Причина: {stop_sale.reason}'
     )
-
-
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
