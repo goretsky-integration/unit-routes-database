@@ -110,6 +110,11 @@ class TelegramMessage(models.Model):
         null=True,
         blank=True,
     )
+    priority = models.PositiveSmallIntegerField(
+        verbose_name=_('Priority'),
+        default=100,
+        help_text=_('Lower priority number messages are sent first.'),
+    )
 
     class Meta:
         verbose_name = _('Telegram message')

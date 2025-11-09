@@ -1,5 +1,4 @@
 import datetime
-import itertools
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -62,62 +61,7 @@ def get_pending_messages(*, limit: int = 30) -> QuerySet[TelegramMessage]:
         sent_at__isnull=True,
         retries_count__gt=0,
         to_be_sent_at__lte=timezone.now(),
-    ).order_by('to_be_sent_at', 'created_at')[:limit]
-
-
-def create_telegram_text_message(
-    bot_token: str,
-    chat_id: int,
-    text: str,
-    reply_markup: InlineKeyboardMarkup | None = None,
-    to_be_sent_at: datetime.datetime | None = None,
-) -> TelegramMessage:
-    if reply_markup is not None:
-        reply_markup = reply_markup.to_dict()
-    if to_be_sent_at is None:
-        to_be_sent_at = timezone.now()
-    return TelegramMessage.objects.create(
-        bot_token=bot_token,
-        chat_id=chat_id,
-        text=text,
-        reply_markup=reply_markup,
-        to_be_sent_at=to_be_sent_at,
-    )
-
-
-def create_telegram_media_group_message(
-    bot_token: str,
-    chat_id: int,
-    file_ids: Iterable[str],
-    text: str | None = None,
-    to_be_sent_at: datetime.datetime | None = None,
-) -> list[TelegramMessage]:
-    if to_be_sent_at is None:
-        to_be_sent_at = timezone.now()
-    file_ids = tuple(file_ids)
-    if not file_ids:
-        raise ValueError('At least one file ID is required')
-
-    first_batch = file_ids[:10]
-    remaining_file_ids = file_ids[10:]
-
-    messages = [
-        TelegramMessage(
-            chat_id=chat_id,
-            text=text,
-            media_file_ids=first_batch,
-            to_be_sent_at=to_be_sent_at,
-        )
-    ]
-    for file_ids_batch in itertools.batched(remaining_file_ids, n=10):
-        messages.append(
-            TelegramMessage(
-                chat_id=chat_id,
-                media_file_ids=file_ids_batch,
-                to_be_sent_at=to_be_sent_at,
-            ),
-        )
-    return TelegramMessage.objects.bulk_create(messages)
+    ).order_by('priority', 'to_be_sent_at', 'created_at')[:limit]
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
