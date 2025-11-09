@@ -12,7 +12,6 @@ from reports.services.filters.stop_sales import filter_not_ended_stop_sales
 from reports.services.formatters.stop_sales import (
     group_by_unit_id,
     format_stop_sales_by_ingredients, group_by_reason,
-    StopSalesGroupedByUnitId,
 )
 from reports.services.gateways.dodo_is_api import (
     get_dodo_is_api_gateway,
@@ -39,7 +38,7 @@ class NewStopSalesFilter:
             )
             if not self.__redis.exists(redis_key):
                 new_stop_sales.append(stop_sale)
-                self.__redis.set(redis_key, '1', ex=3 * 24 * 60 * 60)
+                self.__redis.set(redis_key, '1', ex=30 * 24 * 60 * 60)
         return new_stop_sales
 
 
