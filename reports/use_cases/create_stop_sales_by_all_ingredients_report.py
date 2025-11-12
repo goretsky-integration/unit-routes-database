@@ -63,6 +63,7 @@ class CreateStopSalesByAllIngredientsReport:
                     stop_sales_by_reasons=group_by_reason(
                         unit_stop_sales.stop_sales,
                     ),
+                    timezone=self.timezone,
                 )
 
                 chat_ids = (

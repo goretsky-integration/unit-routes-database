@@ -49,6 +49,8 @@ def compute_duration(
     *,
     timezone: ZoneInfo | None = None,
 ) -> datetime.timedelta:
+    if timezone is not None:
+        started_at = started_at.replace(tzinfo=timezone)
     return datetime.datetime.now(timezone) - started_at
 
 
@@ -198,8 +200,11 @@ def group_by_reason(
     ]
 
 
-def render_stop_sale_by_ingredient(stop_sale: StopSaleByIngredient) -> str:
-    duration = compute_duration(stop_sale.started_at)
+def render_stop_sale_by_ingredient(
+    stop_sale: StopSaleByIngredient,
+    timezone: ZoneInfo,
+) -> str:
+    duration = compute_duration(stop_sale.started_at, timezone=timezone)
     humanized_stop_duration = humanize_stop_sale_duration(duration)
     return (
         f'📍 {stop_sale.ingredient_name}'
@@ -211,6 +216,7 @@ def format_stop_sales_by_ingredients(
     *,
     unit_name: str,
     stop_sales_by_reasons: Iterable[StopSalesByIngredientsGroupedByReason],
+    timezone: ZoneInfo,
 ) -> str:
     lines = [f'<b>{unit_name}</b>']
 
@@ -229,7 +235,7 @@ def format_stop_sales_by_ingredients(
 
         lines.append(f'\n<b>{stop_sales_by_reason.reason}:</b>')
         lines += [
-            render_stop_sale_by_ingredient(stop_sale)
+            render_stop_sale_by_ingredient(stop_sale, timezone=timezone)
             for stop_sale in stop_sales
         ]
     return '\n'.join(lines)
