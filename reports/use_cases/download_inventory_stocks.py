@@ -31,5 +31,5 @@ class DownloadInventoryStocksUseCase:
                     unit_ids=unit_ids,
                 )
                 InventoryStocks.objects.create(
-                    data=type_adapter.dump_python(inventory_stocks),
+                    data=type_adapter.dump_json(inventory_stocks),
                 )
