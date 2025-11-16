@@ -10,11 +10,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = Env()
 env.read_env(BASE_DIR / '.env')
 
-SECRET_KEY = env.str('SECRET_KEY')
+SECRET_KEY = env.str('DJANGO_SECRET_KEY')
 
-DEBUG = env.bool('DEBUG')
+DEBUG = env.bool('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -69,11 +69,11 @@ WSGI_APPLICATION = 'goretsky_integration.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env.str('DATABASE_NAME'),
-        'USER': env.str('DATABASE_USER'),
-        'HOST': env.str('DATABASE_HOST'),
-        'PORT': env.int('DATABASE_PORT'),
-        'PASSWORD': env.str('DATABASE_PASSWORD'),
+        'NAME': env.str('DJANGO_DATABASE_NAME'),
+        'USER': env.str('DJANGO_DATABASE_USER'),
+        'HOST': env.str('DJANGO_DATABASE_HOST'),
+        'PORT': env.int('DJANGO_DATABASE_PORT'),
+        'PASSWORD': env.str('DJANGO_DATABASE_PASSWORD'),
     }
 }
 
@@ -96,7 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = env.str('LANGUAGE_CODE')
+LANGUAGE_CODE = env.str('DJANGO_LANGUAGE_CODE')
 
 TIME_ZONE = 'UTC'
 
@@ -124,22 +124,18 @@ LOCALE_PATHS = [
 ]
 
 SENTRY_DSN = env.str('DJANGO_SENTRY_DSN', default=None)
-
 if SENTRY_DSN is not None:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         send_default_pii=True,
     )
 
-FERNET_KEY = env.str('FERNET_KEY')
+FERNET_KEY = env.str('DJANGO_FERNET_KEY')
 
-DODO_IS_API_CLIENT_ID = env.str('DODO_IS_API_CLIENT_ID')
-DODO_IS_API_CLIENT_SECRET = env.str('DODO_IS_API_CLIENT_SECRET')
+DODO_IS_API_CLIENT_ID = env.str('DJANGO_DODO_IS_API_CLIENT_ID')
+DODO_IS_API_CLIENT_SECRET = env.str('DJANGO_DODO_IS_API_CLIENT_SECRET')
 
-CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-
-TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN')
+TELEGRAM_BOT_TOKEN = env.str('DJANGO_TELEGRAM_BOT_TOKEN')
 
 GOOGLE_SHEETS_CREDENTIALS = BASE_DIR / 'google_sheets_credentials.json'
 
