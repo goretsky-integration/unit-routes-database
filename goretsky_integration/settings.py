@@ -3,7 +3,6 @@ from pathlib import Path
 import sentry_sdk
 from django.utils.translation import gettext_lazy as _
 from environ import Env
-from sentry_sdk.integrations.django import DjangoIntegration
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -124,27 +123,18 @@ LOCALE_PATHS = [
     Path.joinpath(BASE_DIR / 'locale'),
 ]
 
-SENTRY_DSN = env.str('SENTRY_DSN', default=None)
-SENTRY_TRACES_SAMPLE_RATE = env.float(
-    'SENTRY_TRACES_SAMPLE_RATE', default=None,
-)
+SENTRY_DSN = env.str('DJANGO_SENTRY_DSN', default=None)
 
-if SENTRY_DSN is not None and SENTRY_TRACES_SAMPLE_RATE is not None:
+if SENTRY_DSN is not None:
     sentry_sdk.init(
         dsn=env.str('SENTRY_DSN'),
-        integrations=(DjangoIntegration(),),
-        traces_sample_rate=env.float('SENTRY_TRACES_SAMPLE_RATE'),
-        send_default_pii=False,
+        send_default_pii=True,
     )
 
 FERNET_KEY = env.str('FERNET_KEY')
 
 DODO_IS_API_CLIENT_ID = env.str('DODO_IS_API_CLIENT_ID')
 DODO_IS_API_CLIENT_SECRET = env.str('DODO_IS_API_CLIENT_SECRET')
-
-if DEBUG:
-    INSTALLED_APPS.append('silk')
-    MIDDLEWARE.append('silk.middleware.SilkyMiddleware')
 
 CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"

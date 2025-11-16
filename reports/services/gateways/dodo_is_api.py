@@ -491,10 +491,9 @@ class DodoIsApiGateway:
         self,
         *,
         unit_ids: Iterable[UUID],
-    ) -> list[InventoryStockItem]:
+    ) -> Generator[list[InventoryStockItem], None, None]:
         take: int = 1000
         url = '/ru/accounting/inventory-stocks'
-        inventory_stocks: list[InventoryStockItem] = []
 
         for unit_ids_batch in batched(unit_ids, n=self.batch_size):
             for skip in range(0, 100_000, take):
@@ -525,11 +524,9 @@ class DodoIsApiGateway:
                     )
                     break
                 else:
-                    inventory_stocks += inventory_stocks_response.stocks
+                    yield inventory_stocks_response.stocks
                     if inventory_stocks_response.is_end_of_list_reached:
                         break
-
-        return inventory_stocks
 
     def get_recent_feedbacks(
         self,
