@@ -10,12 +10,12 @@ from reports.use_cases.create_daily_revenue_report import \
 
 
 class ReportCreateInputSerializer(serializers.Serializer):
-    report_type = serializers.ChoiceField(choices=['DAILY_REVENUE'])
+    report_type_id = serializers.IntegerField()
     chat_id = serializers.IntegerField()
 
 
 class RequestData(TypedDict):
-    report_type: str
+    report_type_id: int
     chat_id: int
 
 
@@ -26,7 +26,7 @@ class ReportCreateApi(APIView):
         serializer.is_valid(raise_exception=True)
         serialized_data: RequestData = serializer.data
 
-        if serialized_data['report_type'] == 'DAILY_REVENUE':
+        if serialized_data['report_type_id'] == 1:
             CreateDailyRevenueReportUseCase(
                 chat_id=serialized_data['chat_id'],
             ).execute()
