@@ -25,6 +25,8 @@ class ReportTypeListApi(ListAPIView):
         parent_id = self.request.query_params.get("parent_id")
         if parent_id:
             queryset = queryset.filter(parent_id=parent_id)
+        else:
+            queryset = queryset.filter(parent__isnull=True)
         return queryset
 
 
