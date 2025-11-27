@@ -1,4 +1,3 @@
-import pika
 from django.core.management import BaseCommand
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -12,11 +11,6 @@ from write_offs.services import (
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        connection = pika.BlockingConnection(
-            pika.ConnectionParameters('localhost')
-            )
-        channel = connection.channel()
-        channel.queue_declare('specific-units-event')
         write_offs = get_upcoming_write_offs()
         for write_off in write_offs:
             status = get_write_off_status(write_off)
