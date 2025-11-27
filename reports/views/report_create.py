@@ -26,7 +26,7 @@ class ReportCreateApi(APIView):
         serializer.is_valid(raise_exception=True)
         serialized_data: RequestData = serializer.data
 
-        if serialized_data['report_type_id'] == 1:
+        if serialized_data['report_type_id'] == 17:
             CreateDailyRevenueReportUseCase(
                 chat_id=serialized_data['chat_id'],
             ).execute()
