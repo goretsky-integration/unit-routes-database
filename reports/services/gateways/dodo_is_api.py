@@ -116,7 +116,7 @@ class StopSaleBySalesChannel(BaseModel):
     unit_name: Annotated[str, Field(validation_alias='unitName')]
     sales_channel: Annotated[
         SalesChannel,
-        Field(validation_alias='salesChannel'),
+        Field(validation_alias='salesChannelName'),
     ]
     reason: str
     started_at: Annotated[
