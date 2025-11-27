@@ -40,3 +40,29 @@ def get_upcoming_write_offs():
         is_notification_sent=False,
         to_write_off_at__lte=target,
     )
+
+
+
+write_off_type_to_template = {
+    'EXPIRE_AT_15_MINUTES': (
+        'Списание ингредиента <b>"{ingredient_name}"</b> через 15 минут'
+    ),
+    'EXPIRE_AT_10_MINUTES': (
+        'Списание ингредиента <b>"{ingredient_name}"</b> через 10 минут'
+    ),
+    'EXPIRE_AT_5_MINUTES': (
+        'Списание ингредиента <b>"{ingredient_name}"</b> через 5 минут'
+    ),
+    'ALREADY_EXPIRED': (
+        'В пиццерии просрочка ингредиента <b>"{ingredient_name}"</b>'
+    ),
+}
+
+
+def format_write_off(write_off: IngredientWriteOff, status: str) -> str:
+    template = write_off_type_to_template[status]
+    event_description = template.format(ingredient_name=write_off.ingredient.name)
+    return (
+        f'<b>❗️ {write_off.unit.name} ❗️</b>\n'
+        f'{event_description}'
+    )
