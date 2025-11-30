@@ -260,6 +260,47 @@ class UnitsSalesResponse(BaseModel):
     result: list[UnitSales]
 
 
+class UnitDeliveryStatistics(BaseModel):
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    unit_name: Annotated[str, Field(validation_alias='unitName')]
+    avg_delivery_order_fulfillment_time: Annotated[
+        int,
+        Field(validation_alias='avgDeliveryOrderFulfillmentTime'),
+    ]
+    avg_cooking_time: Annotated[
+        int,
+        Field(validation_alias='avgCookingTime'),
+    ]
+    avg_heated_shelf_time: Annotated[
+        int,
+        Field(validation_alias='avgHeatedShelfTime'),
+    ]
+    avg_order_trip_time: Annotated[
+        int,
+        Field(validation_alias='avgOrderTripTime'),
+    ]
+
+
+class UnitsDeliveryStatisticsResponse(BaseModel):
+    units_statistics: Annotated[
+        list[UnitDeliveryStatistics],
+        Field(validation_alias='unitsStatistics'),
+    ]
+
+
+class LateDeliveryVoucher(BaseModel):
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    order_id: Annotated[UUID, Field(validation_alias='orderId')]
+
+
+class LateDeliveryVouchersResponse(BaseModel):
+    vouchers: list[LateDeliveryVoucher]
+    is_end_of_list_reached: Annotated[
+        bool,
+        Field(validation_alias='isEndOfListReached'),
+    ]
+
+
 @contextlib.contextmanager
 def get_dodo_is_api_http_client(
     access_token: str,
@@ -285,6 +326,93 @@ class DodoIsApiGateway:
         unit_ids: Iterable[UUID],
     ) -> list[tuple[UUID, ...]]:
         return list(batched(unit_ids, n=self.batch_size))
+
+    def get_delivery_vouchers(
+        self,
+        *,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        unit_ids: Iterable[UUID],
+    ) -> list[LateDeliveryVoucher]:
+        url = '/ru/delivery/vouchers'
+        take: int = 1000
+
+        result: list[LateDeliveryVoucher] = []
+        for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
+            for skip in range(0, 100_000, take):
+                response = self._try_send_request_with_server_error_handling(
+                    url=url,
+                    params={
+                        'units': join_unit_ids_with_comma(unit_ids_batch),
+                        'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                        'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                        'take': take,
+                        'skip': skip,
+                    },
+                )
+                if response is None:
+                    logger.error(
+                        'Failed to get delivery vouchers for units %s. No response.',
+                        unit_ids_batch,
+                    )
+                    break
+
+                try:
+                    vouchers_response = LateDeliveryVouchersResponse.model_validate_json(
+                        response.text,
+                    )
+                except ValidationError:
+                    logger.exception(
+                        "Failed to parse delivery vouchers response for unit ids: %s",
+                        unit_ids_batch,
+                    )
+                    break
+                else:
+                    result += vouchers_response.vouchers
+                    if vouchers_response.is_end_of_list_reached:
+                        break
+        return result
+
+    def get_delivery_statistics(
+        self,
+        *,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        unit_ids: Iterable[UUID],
+    ) -> list[UnitDeliveryStatistics]:
+        url = '/ru/delivery/statistics'
+
+        result: list[UnitDeliveryStatistics] = []
+        for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params={
+                    'units': join_unit_ids_with_comma(unit_ids_batch),
+                    'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                    'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                },
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get delivery statistics for units %s. No response.',
+                    unit_ids_batch,
+                )
+                break
+
+            try:
+                delivery_statistics_response = UnitsDeliveryStatisticsResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse delivery statistics response for unit ids: %s",
+                    unit_ids_batch,
+                )
+                break
+            else:
+                result += delivery_statistics_response.units_statistics
+
+        return result
 
     def get_stop_sales_by_ingredients(
         self,
