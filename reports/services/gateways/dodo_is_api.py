@@ -5,7 +5,7 @@ from collections.abc import Generator
 from dataclasses import dataclass
 from enum import StrEnum
 from itertools import batched
-from typing import ClassVar, Iterable, NewType, Annotated
+from typing import ClassVar, Iterable, NewType, Annotated, Final
 from uuid import UUID
 
 import httpx
@@ -388,6 +388,22 @@ class ProductivityProductivityResponse(BaseModel):
     productivity_statistics: Annotated[
         list[UnitProductionProductivity],
         Field(validation_alias='productivityStatistics'),
+    ]
+
+
+class StockItem(BaseModel):
+    id: UUID
+    name: str
+
+
+class StockItemsResponse(BaseModel):
+    stock_items: Annotated[
+        list[StockItem],
+        Field(validation_alias='stockItems'),
+    ]
+    is_end_of_list_reached: Annotated[
+        bool,
+        Field(validation_alias='isEndOfListReached'),
     ]
 
 
@@ -914,6 +930,40 @@ class DodoIsApiGateway:
                 units_sales += units_sales_response.result
 
         return units_sales
+
+    def get_stock_items(
+        self,
+    ) -> Generator[list[StockItem], None, None]:
+        url = '/ru/accounting/stock-items'
+        take: Final[int] = 1000
+
+        for skip in range(0, 100_000, take):
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params={
+                    'take': take,
+                    'skip': skip,
+                },
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get stock items. No response.',
+                )
+                break
+
+            try:
+                stock_items_response = StockItemsResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse stock items response.",
+                )
+                break
+            else:
+                yield stock_items_response.stock_items
+                if stock_items_response.is_end_of_list_reached:
+                    break
 
 
 @contextlib.contextmanager
