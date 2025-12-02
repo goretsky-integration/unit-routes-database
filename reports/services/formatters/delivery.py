@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 
+from reports.services.formatters.sales import int_gaps
 from reports.services.formatters.stop_sales import (
     humanize_seconds,
     group_by_unit_id,
@@ -118,5 +119,63 @@ def format_delivery_vouchers_report(
             f' | {len(vouchers_week_before)}'
         )
         lines.append(line)
+
+    return '\n'.join(lines)
+
+
+def format_delivery_performance(
+    units: Iterable[Unit],
+    today: Iterable[UnitDeliveryStatistics],
+    week_before: Iterable[UnitDeliveryStatistics],
+) -> str:
+    lines: list[str] = [
+        '<b>Заказов на курьера в час</b>',
+    ]
+
+    unit_id_to_orders_per_labor_hour_today = {
+        statistics.unit_id: statistics.orders_per_courier_per_labor_hour
+        for statistics in today
+    }
+    unit_id_to_orders_per_labor_hour_week_before = {
+        statistics.unit_id: statistics.orders_per_courier_per_labor_hour
+        for statistics in week_before
+    }
+
+    result: list[tuple[str, float, float]] = []
+    for unit in units:
+        orders_per_labor_hour_today = (
+            unit_id_to_orders_per_labor_hour_today.get(unit.uuid, 0.0)
+        )
+        orders_per_labor_hour_week_before = (
+            unit_id_to_orders_per_labor_hour_week_before.get(unit.uuid, 0.0)
+        )
+
+        if orders_per_labor_hour_week_before == 0:
+            orders_growth_in_percents = (
+                100 if orders_per_labor_hour_today > 0 else 0
+            )
+        else:
+            orders_growth_in_percents = round(
+                (
+                    (
+                        orders_per_labor_hour_today - orders_per_labor_hour_week_before)
+                    / orders_per_labor_hour_week_before
+                ) * 100,
+            )
+        result.append(
+            (
+                unit.name,
+                orders_per_labor_hour_today,
+                orders_growth_in_percents,
+            ),
+        )
+
+    result.sort(key=lambda x: x[1])
+    for unit_name, today, week_before in result:
+        lines.append(
+            f'{unit_name}'
+            f' | {int_gaps(round(today))}'
+            f' | {week_before:+}%',
+        )
 
     return '\n'.join(lines)

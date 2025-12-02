@@ -9,7 +9,7 @@ from typing import ClassVar, Iterable, NewType, Annotated
 from uuid import UUID
 
 import httpx
-from pydantic import ValidationError, Field, BaseModel
+from pydantic import ValidationError, Field, BaseModel, computed_field
 
 
 logger = logging.getLogger(__name__)
@@ -263,6 +263,14 @@ class UnitsSalesResponse(BaseModel):
 class UnitDeliveryStatistics(BaseModel):
     unit_id: Annotated[UUID, Field(validation_alias='unitId')]
     unit_name: Annotated[str, Field(validation_alias='unitName')]
+    delivery_sales: Annotated[
+        float,
+        Field(validation_alias='deliverySales'),
+    ]
+    delivery_orders_count: Annotated[
+        int,
+        Field(validation_alias='deliveryOrdersCount'),
+    ]
     avg_delivery_order_fulfillment_time: Annotated[
         int,
         Field(validation_alias='avgDeliveryOrderFulfillmentTime'),
@@ -279,6 +287,20 @@ class UnitDeliveryStatistics(BaseModel):
         int,
         Field(validation_alias='avgOrderTripTime'),
     ]
+    couriers_shifts_duration: Annotated[
+        int,
+        Field(validation_alias='couriersShiftsDuration'),
+    ]
+
+    @computed_field
+    @property
+    def orders_per_courier_per_labor_hour(self) -> float:
+        if self.couriers_shifts_duration == 0:
+            return 0.0
+        return (
+            self.delivery_orders_count
+            / (self.couriers_shifts_duration / 3600)
+        )
 
 
 class UnitsDeliveryStatisticsResponse(BaseModel):
