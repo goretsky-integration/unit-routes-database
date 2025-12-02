@@ -20,6 +20,8 @@ from reports.use_cases.create_kitchen_performance_report import \
     CreateKitchenPerformanceReportUseCase
 from reports.use_cases.create_late_delivery_vouchers_report import \
     CreateLateDeliveryVouchersReportUseCase
+from reports.use_cases.create_productivity_balance_report import \
+    CreateProductivityBalanceReportUseCase
 
 
 class ReportCreateInputSerializer(serializers.Serializer):
@@ -67,6 +69,10 @@ class ReportCreateApi(APIView):
             ).execute()
         elif report_type_id == 16:
             CreateLateDeliveryVouchersReportUseCase(
+                chat_id=serialized_data['chat_id'],
+            ).execute()
+        elif report_type_id == 20:
+            CreateProductivityBalanceReportUseCase(
                 chat_id=serialized_data['chat_id'],
             ).execute()
 

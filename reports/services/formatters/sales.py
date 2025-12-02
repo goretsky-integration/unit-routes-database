@@ -1,10 +1,17 @@
+from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
+from reports.services.formatters.stop_sales import (
+    humanize_seconds,
+    compute_duration,
+)
 from reports.services.gateways.dodo_is_api import (
     UnitSales,
-    UnitProductionProductivity,
+    UnitProductionProductivity, UnitDeliveryStatistics, StopSaleBySalesChannel,
+    ChannelStopType,
 )
 from units.models import Unit
 
@@ -173,4 +180,76 @@ def format_production_performance_statistics(
             f' | {week_before:+}%',
         )
 
+    return '\n'.join(lines)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class UnitProductivityBalance:
+    unit_name: str
+    sales_per_labor_hour: float
+    orders_per_labor_hour: float
+    stop_sale_duration_in_seconds: int
+
+
+def format_productivity_balance_report(
+    *,
+    units: Iterable[Unit],
+    production_productivity: Iterable[UnitProductionProductivity],
+    delivery_statistics: Iterable[UnitDeliveryStatistics],
+    stop_sales: Iterable[StopSaleBySalesChannel],
+    timezone: ZoneInfo,
+) -> str:
+    lines = ['<b>Баланс эффективности</b>']
+
+    unit_id_to_sales_per_labor_hour_today = {
+        stats.unit_id: stats.sales_per_labor_hour
+        for stats in production_productivity
+    }
+    unit_id_to_orders_per_labor_hour: dict[UUID, float] = {
+        stats.unit_id: stats.orders_per_courier_per_labor_hour
+        for stats in delivery_statistics
+    }
+    unit_id_to_stop_sale_duration = defaultdict(int)
+    for stop_sale in stop_sales:
+        if stop_sale.channel_stop_type != ChannelStopType.COMPLETE:
+            continue
+        duration = compute_duration(
+            started_at=stop_sale.started_at,
+            timezone=timezone,
+        )
+        unit_id_to_stop_sale_duration[
+            stop_sale.unit_id] += int(duration.total_seconds())
+
+    result: list[UnitProductivityBalance] = []
+    for unit in units:
+        sales_per_labor_hour = (
+            unit_id_to_sales_per_labor_hour_today.get(unit.uuid, 0.0)
+        )
+        orders_per_labor_hour = (
+            unit_id_to_orders_per_labor_hour.get(unit.uuid, 0.0)
+        )
+        stop_sale_duration_in_seconds = (
+            unit_id_to_stop_sale_duration.get(unit.uuid, 0)
+        )
+
+        result.append(
+            UnitProductivityBalance(
+                unit_name=unit.name,
+                sales_per_labor_hour=sales_per_labor_hour,
+                orders_per_labor_hour=orders_per_labor_hour,
+                stop_sale_duration_in_seconds=stop_sale_duration_in_seconds,
+            ),
+        )
+
+    result.sort(key=lambda x: x.sales_per_labor_hour, reverse=True)
+
+    lines += [
+        (
+            f'{unit_statistics.unit_name}'
+            f' | {int_gaps(unit_statistics.sales_per_labor_hour)}'
+            f' | {round(unit_statistics.orders_per_labor_hour, 1)}'
+            f' | {humanize_seconds(unit_statistics.stop_sale_duration_in_seconds)}'
+        )
+        for unit_statistics in result
+    ]
     return '\n'.join(lines)

@@ -1,5 +1,6 @@
 from collections import defaultdict
 from collections.abc import Iterable
+from dataclasses import dataclass
 
 from reports.services.formatters.sales import int_gaps
 from reports.services.formatters.stop_sales import (
@@ -8,7 +9,8 @@ from reports.services.formatters.stop_sales import (
 )
 from reports.services.gateways.dodo_is_api import (
     UnitDeliveryStatistics,
-    LateDeliveryVoucher, UnitOrdersHandoverStatistics,
+    LateDeliveryVoucher, UnitOrdersHandoverStatistics, StopSaleBySalesChannel,
+    UnitProductionProductivity,
 )
 from units.models import Unit
 
@@ -223,3 +225,23 @@ def format_delivery_cooking_time_report(
         units=units,
         units_orders_handover_statistics=units_orders_handover_statistics,
     )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class UnitAwaitingOrdersStatistics:
+    unit_name: str
+    heated_shelf_orders_count: int
+    couriers_in_queue_count: int
+    couriers_on_shift_count: int
+
+
+def format_awaiting_orders_statistics_report(
+    # *,
+) -> str:
+    lines = ['<b>Остывают на полке - В очереди (Всего)</b>']
+    lines += [
+        f'{unit.unit_name} | {unit.heated_shelf_orders_count}'
+        f' - {unit.couriers_in_queue_count} ({unit.couriers_on_shift_count})'
+        for unit in units_statistics
+    ]
+    return '\n'.join(lines)
