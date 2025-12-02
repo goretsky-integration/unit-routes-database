@@ -301,6 +301,32 @@ class LateDeliveryVouchersResponse(BaseModel):
     ]
 
 
+class UnitProductionProductivity(BaseModel):
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    unitName: Annotated[str, Field(validation_alias='unitName')]
+    labor_hours: Annotated[float, Field(validation_alias='laborHours')]
+    sales: float
+    sales_per_labor_hour: Annotated[
+        float,
+        Field(validation_alias='salesPerLaborHour'),
+    ]
+    products_per_labor_hour: Annotated[
+        float,
+        Field(validation_alias='productsPerLaborHour'),
+    ]
+    avg_heated_shelf_time: Annotated[
+        int,
+        Field(validation_alias='avgHeatedShelfTime'),
+    ]
+
+
+class ProductivityProductivityResponse(BaseModel):
+    productivity_statistics: Annotated[
+        list[UnitProductionProductivity],
+        Field(validation_alias='productivityStatistics'),
+    ]
+
+
 @contextlib.contextmanager
 def get_dodo_is_api_http_client(
     access_token: str,
@@ -326,6 +352,45 @@ class DodoIsApiGateway:
         unit_ids: Iterable[UUID],
     ) -> list[tuple[UUID, ...]]:
         return list(batched(unit_ids, n=self.batch_size))
+
+    def get_production_productivity(
+        self,
+        *,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        unit_ids: Iterable[UUID],
+    ) -> list[UnitProductionProductivity]:
+        url = '/ru/production/productivity'
+
+        result: list[UnitProductionProductivity] = []
+        for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params={
+                    'units': join_unit_ids_with_comma(unit_ids_batch),
+                    'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                    'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                },
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get production productivity for units %s. No response.',
+                    unit_ids_batch,
+                )
+                break
+            try:
+                productivity_response = ProductivityProductivityResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse production productivity response for unit ids: %s",
+                    unit_ids_batch,
+                )
+                break
+            else:
+                result += productivity_response.productivity_statistics
+        return result
 
     def get_delivery_vouchers(
         self,

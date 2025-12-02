@@ -2,7 +2,10 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from uuid import UUID
 
-from reports.services.gateways.dodo_is_api import UnitSales
+from reports.services.gateways.dodo_is_api import (
+    UnitSales,
+    UnitProductionProductivity,
+)
 from units.models import Unit
 
 
@@ -91,12 +94,13 @@ def int_gaps(number: int | float) -> str:
     """
     return f'{number:,}'.replace(',', ' ')
 
+
 def format_sales_statistics(
     units_sales_statistics: UnitsSalesStatistics
 ) -> str:
     units_sales = sorted(
         units_sales_statistics.units_sales,
-        key=lambda unit_sales: unit_sales.sales_for_today
+        key=lambda unit_sales: unit_sales.sales_for_today,
     )
 
     lines: list[str] = ['<b>Выручка за сегодня</b>']
@@ -108,7 +112,65 @@ def format_sales_statistics(
     ]
     lines.append(
         f'<b>Итого: {int_gaps(units_sales_statistics.total_sales_for_today)}'
-        f' | {units_sales_statistics.sales_growth_from_week_before_in_percents:+}%</b>'
+        f' | {units_sales_statistics.sales_growth_from_week_before_in_percents:+}%</b>',
     )
+
+    return '\n'.join(lines)
+
+
+def format_production_performance_statistics(
+    units: Iterable[Unit],
+    today: Iterable[UnitProductionProductivity],
+    week_before: Iterable[UnitProductionProductivity],
+) -> str:
+    lines: list[str] = [
+        '<b>Выручка на чел. в час</b>',
+    ]
+
+    unit_id_to_sales_per_labor_hour_today = {
+        productivity.unit_id: productivity.sales_per_labor_hour
+        for productivity in today
+    }
+    unit_id_to_sales_per_labor_hour_week_before = {
+        productivity.unit_id: productivity.sales_per_labor_hour
+        for productivity in week_before
+    }
+
+    result: list[tuple[str, float, float]] = []
+    for unit in units:
+        sales_per_labor_hour_today = (
+            unit_id_to_sales_per_labor_hour_today.get(unit.uuid, 0.0)
+        )
+        sales_per_labor_hour_week_before = (
+            unit_id_to_sales_per_labor_hour_week_before.get(unit.uuid, 0.0)
+        )
+
+        if sales_per_labor_hour_week_before == 0:
+            sales_growth_in_percents = (
+                100 if sales_per_labor_hour_today > 0 else 0
+            )
+        else:
+            sales_growth_in_percents = round(
+                (
+                    (
+                        sales_per_labor_hour_today - sales_per_labor_hour_week_before)
+                    / sales_per_labor_hour_week_before
+                ) * 100,
+            )
+        result.append(
+            (
+                unit.name,
+                sales_per_labor_hour_today,
+                sales_growth_in_percents,
+            ),
+        )
+
+    result.sort(key=lambda x: x[1])
+    for unit_name, today, week_before in result:
+        lines.append(
+            f'{unit_name}'
+            f' | {int_gaps(round(today))}'
+            f' | {week_before:+}%',
+        )
 
     return '\n'.join(lines)
