@@ -60,7 +60,7 @@ class CreateCookingTimeReportUseCase(CreateReportUseCase):
         )
 
 
-class RestaurantCookingTimeReportUseCase(CreateCookingTimeReportUseCase):
+class CreateRestaurantCookingTimeReportUseCase(CreateCookingTimeReportUseCase):
     def get_sales_channels(self) -> list[
         OrdersHandoverStatisticsRequestParamSalesChannel]:
         return [OrdersHandoverStatisticsRequestParamSalesChannel.DINE_IN]
@@ -73,7 +73,7 @@ class RestaurantCookingTimeReportUseCase(CreateCookingTimeReportUseCase):
         return format_restaurant_cooking_time_report(units, units_statistics)
 
 
-class DeliveryCookingTimeReportUseCase(CreateCookingTimeReportUseCase):
+class CreateDeliveryCookingTimeReportUseCase(CreateCookingTimeReportUseCase):
     def get_sales_channels(self) -> list[
         OrdersHandoverStatisticsRequestParamSalesChannel]:
         return [OrdersHandoverStatisticsRequestParamSalesChannel.DELIVERY]

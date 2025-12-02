@@ -170,7 +170,7 @@ class StopSalesGroupedByUnitId(Generic[HasUnitIdT]):
 
 def group_by_unit_id(
     stop_sales: Iterable[HasUnitIdT],
-) -> list[StopSalesGroupedByUnitId]:
+) -> list[HasUnitIdT]:
     unit_id_to_stop_sales = defaultdict(list)
     for stop_sale in stop_sales:
         unit_id_to_stop_sales[stop_sale.unit_id].append(stop_sale)

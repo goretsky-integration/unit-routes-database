@@ -10,11 +10,14 @@ class CreateReportUseCase:
     chat_id: int
 
     def get_units(self) -> list[Unit]:
-        return list(
+        routes = (
             ReportRoute.objects
-            .filter(telegram_chat__chat_id=self.chat_id)
-            .values_list('unit', flat=True),
+            .filter(telegram_chat__chat_id=self.chat_id, report_type_id=1)
+            .only('unit')
         )
+        return [
+            route.unit for route in routes
+        ]
 
     def get_account_tokens_and_units(self) -> list[
         tuple[AccountTokens, list[Unit]]]:

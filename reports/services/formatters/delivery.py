@@ -1,3 +1,4 @@
+from collections import defaultdict
 from collections.abc import Iterable
 
 from reports.services.formatters.sales import int_gaps
@@ -53,13 +54,13 @@ def format_unit_delivery_speed_statistics(
         unit_delivery_statistics.avg_delivery_order_fulfillment_time,
     )
     average_cooking_time_in_seconds = humanize_seconds(
-        unit_delivery_statistics.avg_cooking_time_in_seconds,
+        unit_delivery_statistics.avg_cooking_time,
     )
     average_heated_shelf_time_in_seconds = humanize_seconds(
-        unit_delivery_statistics.avg_heated_shelf_time_in_seconds,
+        unit_delivery_statistics.avg_heated_shelf_time,
     )
     average_order_trip_time_in_seconds = humanize_seconds(
-        unit_delivery_statistics.avg_order_trip_time_in_seconds,
+        unit_delivery_statistics.avg_order_trip_time,
     )
     return (
         f'{unit_name}'
@@ -103,20 +104,22 @@ def format_delivery_vouchers_report(
 ) -> str:
     lines = ['<b>Сертификаты за опоздание (сегодня) | (неделю назад)</b>']
 
-    unit_id_to_vouchers_for_today = group_by_unit_id(vouchers_for_today)
-    unit_id_to_vouchers_for_week_before = group_by_unit_id(
-        vouchers_for_week_before,
-    )
+    unit_id_to_count_today = defaultdict(int)
+    for voucher in vouchers_for_today:
+        unit_id_to_count_today[voucher.unit_id] += 1
+
+    unit_id_to_count_week_before = defaultdict(int)
+    for voucher in vouchers_for_week_before:
+        unit_id_to_count_week_before[voucher.unit_id] += 1
 
     for unit in units:
-        vouchers_today = unit_id_to_vouchers_for_today.get(unit.uuid, [])
-        vouchers_week_before = unit_id_to_vouchers_for_week_before.get(
-            unit.uuid, [],
-        )
+        vouchers_today = unit_id_to_count_today[unit.uuid]
+        vouchers_week_before = unit_id_to_count_week_before[unit.uuid]
+
         line = (
             f'{abbreviate_unit_name(unit.name)}'
-            f' | {len(vouchers_today)}'
-            f' | {len(vouchers_week_before)}'
+            f' | {vouchers_today}'
+            f' | {vouchers_week_before}'
         )
         lines.append(line)
 
@@ -174,7 +177,7 @@ def format_delivery_performance(
     for unit_name, today, week_before in result:
         lines.append(
             f'{unit_name}'
-            f' | {int_gaps(round(today))}'
+            f' | {int_gaps(round(today, 1))}'
             f' | {week_before:+}%',
         )
 

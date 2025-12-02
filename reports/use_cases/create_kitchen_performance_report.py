@@ -15,8 +15,8 @@ class CreateKitchenPerformanceReportUseCase(CreateReportUseCase):
     timezone: ZoneInfo = ZoneInfo("Europe/Moscow")
 
     def execute(self) -> None:
-        today = Period.today_to_this_time(self.timezone)
-        week_before = Period.week_before_to_this_time(self.timezone)
+        today = Period.today_to_this_time(self.timezone).rounded_to_upper_hour()
+        week_before = Period.week_before_to_this_time(self.timezone).rounded_to_upper_hour()
 
         today_data = []
         week_before_data = []

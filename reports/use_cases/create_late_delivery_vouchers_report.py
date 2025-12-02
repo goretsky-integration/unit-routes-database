@@ -12,7 +12,7 @@ from telegram.services import batch_create_telegram_messages
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class CreateDeliverySpeedReportUseCase(CreateReportUseCase):
+class CreateLateDeliveryVouchersReportUseCase(CreateReportUseCase):
     timezone: ZoneInfo = ZoneInfo("Europe/Moscow")
 
     def execute(self) -> None:

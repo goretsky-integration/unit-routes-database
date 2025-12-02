@@ -9,6 +9,19 @@ class Period:
     start: datetime.datetime
     end: datetime.datetime
 
+    def rounded_to_upper_hour(self) -> Self:
+        rounded_end = self.end.replace(
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+        if rounded_end < self.end:
+            rounded_end += datetime.timedelta(hours=1)
+        return Period(
+            start=self.start,
+            end=rounded_end,
+        )
+
     @classmethod
     def today_to_this_time(cls, timezone: ZoneInfo | None = None) -> Self:
         now = datetime.datetime.now(timezone)
