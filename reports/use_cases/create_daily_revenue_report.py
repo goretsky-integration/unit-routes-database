@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from zoneinfo import ZoneInfo
 
-from accounts.models import AccountTokens
 from accounts.services.crypt import decrypt_string
 from reports.services.formatters.sales import (
     group_sales,
@@ -9,17 +8,16 @@ from reports.services.formatters.sales import (
 )
 from reports.services.gateways.dodo_is_api import get_dodo_is_api_gateway
 from reports.services.period import Period
+from reports.use_cases.create_report import CreateReportUseCase
 from telegram.services import batch_create_telegram_messages
-from units.models import Unit
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class CreateDailyRevenueReportUseCase:
+class CreateDailyRevenueReportUseCase(CreateReportUseCase):
     chat_id: int
     timezone: ZoneInfo = ZoneInfo("Europe/Moscow")
 
     def execute(self) -> None:
-        accounts_tokens = AccountTokens.objects.select_related('account').all()
         today = Period.today_to_this_time(self.timezone)
         week_before = Period.week_before_to_this_time(self.timezone)
 
@@ -28,10 +26,7 @@ class CreateDailyRevenueReportUseCase:
 
         all_units = []
 
-        for account_token in accounts_tokens:
-            units = Unit.objects.filter(
-                dodo_is_api_account_name=account_token.account.name,
-            )
+        for account_token, units in self.get_account_tokens_and_units():
             all_units += units
             unit_ids = {unit.uuid for unit in units}
 

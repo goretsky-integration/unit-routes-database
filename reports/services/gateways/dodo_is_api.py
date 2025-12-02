@@ -99,6 +99,48 @@ class StaffMembersBirthdaysResponse(BaseModel):
     ]
 
 
+class OrdersHandoverStatisticsRequestParamSalesChannel(StrEnum):
+    DINE_IN = 'DineIn'
+    TAKEAWAY = 'TakeAway'
+    DELIVERY = 'Delivery'
+
+
+class UnitOrdersHandoverStatistics(BaseModel):
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    unit_name: Annotated[str, Field(validation_alias='unitName')]
+    avg_tracking_pending_time: Annotated[
+        int,
+        Field(validation_alias='avgTrackingPendingTime'),
+    ]
+    avg_cooking_time: Annotated[
+        int,
+        Field(validation_alias='avgCookingTime'),
+    ]
+    avg_heated_shelf_time: Annotated[
+        int,
+        Field(validation_alias='avgHeatedShelfTime'),
+    ]
+    avg_order_assembly_time: Annotated[
+        int | None,
+        Field(validation_alias='avgOrderAssemblyTime'),
+    ]
+    avg_order_handover_time: Annotated[
+        int,
+        Field(validation_alias='avgOrderHandoverTime'),
+    ]
+    orders_count: Annotated[
+        int,
+        Field(validation_alias='ordersCount'),
+    ]
+
+
+class OrdersHandoverStatisticsResponse(BaseModel):
+    orders_handover_statistics: Annotated[
+        list[UnitOrdersHandoverStatistics],
+        Field(validation_alias='ordersHandoverStatistics'),
+    ]
+
+
 class SalesChannel(StrEnum):
     DINE_IN = 'Dine-in'
     TAKEAWAY = 'Takeaway'
@@ -374,6 +416,54 @@ class DodoIsApiGateway:
         unit_ids: Iterable[UUID],
     ) -> list[tuple[UUID, ...]]:
         return list(batched(unit_ids, n=self.batch_size))
+
+    def get_orders_handover_statistics(
+        self,
+        *,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        unit_ids: Iterable[UUID],
+        sales_channels: Iterable[SalesChannel] | None = None,
+    ) -> list[UnitOrdersHandoverStatistics]:
+        url = '/ru/production/orders-handover-statistics'
+
+        result: list[UnitOrdersHandoverStatistics] = []
+        for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
+            params: dict[str, str | int] = {
+                'units': join_unit_ids_with_comma(unit_ids_batch),
+                'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+            }
+            if sales_channels:
+                params['salesChannels'] = ','.join(
+                    [str(channel.value) for channel in sales_channels],
+                )
+
+            response = self._try_send_request_with_server_error_handling(
+                url=url,
+                params=params,
+            )
+            if response is None:
+                logger.error(
+                    'Failed to get orders handover statistics for units %s. No response.',
+                    unit_ids_batch,
+                )
+                break
+
+            try:
+                handover_statistics_response = OrdersHandoverStatisticsResponse.model_validate_json(
+                    response.text,
+                )
+            except ValidationError:
+                logger.exception(
+                    "Failed to parse orders handover statistics response for unit ids: %s",
+                    unit_ids_batch,
+                )
+                break
+            else:
+                result += handover_statistics_response.orders_handover_statistics
+
+        return result
 
     def get_production_productivity(
         self,

@@ -7,7 +7,7 @@ from reports.services.formatters.stop_sales import (
 )
 from reports.services.gateways.dodo_is_api import (
     UnitDeliveryStatistics,
-    LateDeliveryVoucher,
+    LateDeliveryVoucher, UnitOrdersHandoverStatistics,
 )
 from units.models import Unit
 
@@ -179,3 +179,44 @@ def format_delivery_performance(
         )
 
     return '\n'.join(lines)
+
+
+def format_cooking_time(
+    header: str,
+    units: Iterable[Unit],
+    units_orders_handover_statistics: Iterable[UnitOrdersHandoverStatistics],
+) -> str:
+    lines: list[str] = [f'<b>{header}</b>']
+    unit_id_to_cooking_time = {
+        statistics.unit_id: statistics.avg_tracking_pending_time + statistics.avg_cooking_time
+        for statistics in units_orders_handover_statistics
+    }
+
+    for unit in units:
+        cooking_time_in_seconds = unit_id_to_cooking_time.get(unit.uuid, 0)
+        humanized_cooking_time = humanize_seconds(cooking_time_in_seconds)
+        lines.append(f'{unit.name} | {humanized_cooking_time}')
+
+    return '\n'.join(lines)
+
+
+def format_restaurant_cooking_time_report(
+    units: Iterable[Unit],
+    units_orders_handover_statistics: Iterable[UnitOrdersHandoverStatistics],
+) -> str:
+    return format_cooking_time(
+        header='<b>Время приготовления в ресторане</b>',
+        units=units,
+        units_orders_handover_statistics=units_orders_handover_statistics,
+    )
+
+
+def format_delivery_cooking_time_report(
+    units: Iterable[Unit],
+    units_orders_handover_statistics: Iterable[UnitOrdersHandoverStatistics],
+) -> str:
+    return format_cooking_time(
+        header='<b>Время приготовления на доставку</b>',
+        units=units,
+        units_orders_handover_statistics=units_orders_handover_statistics,
+    )
