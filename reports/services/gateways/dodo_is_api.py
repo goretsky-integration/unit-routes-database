@@ -407,6 +407,28 @@ class StockItemsResponse(BaseModel):
     ]
 
 
+class CourierOrder(BaseModel):
+    order_id: Annotated[UUID, Field(validation_alias='orderId')]
+    trip_id: Annotated[UUID, Field(validation_alias='tripId')]
+    unit_id: Annotated[UUID, Field(validation_alias='unitId')]
+    unit_name: Annotated[str, Field(validation_alias='unitName')]
+    trip_orders_count: Annotated[
+        int,
+        Field(validation_alias='tripOrdersCount'),
+    ]
+
+
+class CourierOrdersResponse(BaseModel):
+    couriers_orders: Annotated[
+        list[CourierOrder],
+        Field(validation_alias='couriersOrders'),
+    ]
+    is_end_of_list_reached: Annotated[
+        bool,
+        Field(validation_alias='isEndOfListReached'),
+    ]
+
+
 @contextlib.contextmanager
 def get_dodo_is_api_http_client(
     access_token: str,
@@ -432,6 +454,52 @@ class DodoIsApiGateway:
         unit_ids: Iterable[UUID],
     ) -> list[tuple[UUID, ...]]:
         return list(batched(unit_ids, n=self.batch_size))
+
+    def get_couriers_orders(
+        self,
+        *,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        unit_ids: Iterable[UUID],
+    ) -> list[CourierOrder]:
+        url = '/ru/delivery/couriers-orders'
+        take: Final[int] = 1000
+
+        result: list[CourierOrder] = []
+        for unit_ids_batch in self.get_batched_units(unit_ids=unit_ids):
+            for skip in range(0, 100_000, take):
+                response = self._try_send_request_with_server_error_handling(
+                    url=url,
+                    params={
+                        'units': join_unit_ids_with_comma(unit_ids_batch),
+                        'from': f'{date_from:%Y-%m-%dT%H:%M:%S}',
+                        'to': f'{date_to:%Y-%m-%dT%H:%M:%S}',
+                        'take': take,
+                        'skip': skip,
+                    },
+                )
+                if response is None:
+                    logger.error(
+                        'Failed to get couriers orders for units %s. No response.',
+                        unit_ids_batch,
+                    )
+                    break
+
+                try:
+                    couriers_orders_response = CourierOrdersResponse.model_validate_json(
+                        response.text,
+                    )
+                except ValidationError:
+                    logger.exception(
+                        "Failed to parse couriers orders response for unit ids: %s",
+                        unit_ids_batch,
+                    )
+                    break
+                else:
+                    result += couriers_orders_response.couriers_orders
+                    if couriers_orders_response.is_end_of_list_reached:
+                        break
+        return result
 
     def get_orders_handover_statistics(
         self,

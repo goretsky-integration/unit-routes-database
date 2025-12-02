@@ -1,6 +1,7 @@
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
+from uuid import UUID
 
 from reports.services.formatters.sales import int_gaps
 from reports.services.formatters.stop_sales import (
@@ -10,7 +11,7 @@ from reports.services.formatters.stop_sales import (
 from reports.services.gateways.dodo_is_api import (
     UnitDeliveryStatistics,
     LateDeliveryVoucher, UnitOrdersHandoverStatistics, StopSaleBySalesChannel,
-    UnitProductionProductivity,
+    UnitProductionProductivity, CourierOrder,
 )
 from units.models import Unit
 
@@ -245,3 +246,49 @@ def format_awaiting_orders_statistics_report(
         for unit in units_statistics
     ]
     return '\n'.join(lines)
+
+
+def format_heated_shelf_time_statistics_report(
+    units: Iterable[Unit],
+    units_orders_handover_statistics: Iterable[UnitOrdersHandoverStatistics],
+    couriers_orders: Iterable[CourierOrder],
+) -> str:
+    # unit_id -> trip_id -> count_orders_in_trip
+    unit_to_trip_counts: dict[UUID, dict[UUID, int]] = defaultdict(
+        lambda: defaultdict(int),
+    )
+
+    # собираем статистику
+    for order in couriers_orders:
+        unit_to_trip_counts[order.unit_id][order.trip_id] += 1
+
+    # расчёт результата: unit_id -> %
+    unit_to_one_order_percent: dict[UUID, float] = {}
+
+    for unit_id, trips in unit_to_trip_counts.items():
+        total_trips = len(trips)
+        one_order_trips = sum(1 for count in trips.values() if count == 1)
+
+        percent = (one_order_trips / total_trips * 100) if total_trips else 0
+        unit_to_one_order_percent[unit_id] = percent
+
+    unit_id_to_heated_shelf_time = {
+        statistics.unit_id: statistics.avg_heated_shelf_time
+        for statistics in units_orders_handover_statistics
+    }
+
+    lines: list[str] = ['<b>Время ожидания на полке / 1в1</b>']
+    for unit in units:
+        heated_shelf_time_in_seconds = unit_id_to_heated_shelf_time.get(
+            unit.uuid, 0,
+        )
+        humanized_heated_shelf_time = humanize_seconds(
+            heated_shelf_time_in_seconds,
+        )
+        one_order_percent = round(unit_to_one_order_percent.get(unit.uuid, 0))
+        lines.append(
+            f'{unit.name} | {humanized_heated_shelf_time}'
+            f' | {one_order_percent}%',
+        )
+
+    return "\n".join(lines)
