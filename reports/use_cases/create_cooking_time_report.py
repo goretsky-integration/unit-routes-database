@@ -37,10 +37,10 @@ class CreateCookingTimeReportUseCase(CreateReportUseCase):
 
     def execute(self) -> None:
         today = Period.today_to_this_time(self.timezone)
-        all_units = Unit.objects.all()
-
+        all_units = []
         result = []
         for account_token, units in self.get_account_tokens_and_units():
+            all_units += units
             access_token = decrypt_string(account_token.encrypted_access_token)
 
             with get_dodo_is_api_gateway(
