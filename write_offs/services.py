@@ -1,3 +1,5 @@
+import datetime
+
 from django.utils import timezone
 from datetime import timedelta
 from write_offs.models import IngredientWriteOff
@@ -34,7 +36,7 @@ def get_upcoming_write_offs():
     ahead of current time — or any that were missed due to delay.
     No window used; just `lte` to ensure no silent skips.
     """
-    now = timezone.now()
+    now = datetime.datetime.now(datetime.UTC)
     target = now + timedelta(minutes=15)
     return IngredientWriteOff.objects.select_related('unit', 'ingredient').filter(
         is_notification_sent=False,

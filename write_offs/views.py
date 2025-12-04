@@ -1,3 +1,4 @@
+import datetime
 from uuid import UUID
 
 from django.utils import timezone
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, ListAPIView
 from rest_framework import serializers, status
+from rest_framework.filters import SearchFilter
 
 from units.models import Unit
 from write_offs.models import IngredientWriteOff, Ingredient
@@ -17,16 +19,15 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class IngredientSearchFilter(SearchFilter):
+    search_param = 'name'
+
+
 class IngredientListApi(ListAPIView):
     serializer_class = IngredientSerializer
-    queryset = Ingredient.objects.all()
-
-    def list(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
-        response.data = {
-            'ingredients': response.data,
-        }
-        return response
+    queryset = Ingredient.objects.order_by('name')
+    filter_backends = (IngredientSearchFilter,)
+    search_fields = ('name',)
 
 
 class IngredientWriteOffCreateSerializer(serializers.ModelSerializer):
