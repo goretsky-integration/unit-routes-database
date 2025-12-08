@@ -29,12 +29,13 @@ class CreateInventoryStocksBalanceReportUseCase:
 
             access_token = decrypt_string(account_token.encrypted_access_token)
 
+            inventory_stocks = []
             with get_dodo_is_api_gateway(
                 access_token=access_token,
             ) as dodo_is_api_gateway:
-                inventory_stocks = dodo_is_api_gateway.get_inventory_stocks(
-                    unit_ids=unit_ids,
-                )
+                for unit_id in unit_ids:
+                    for stocks in dodo_is_api_gateway.get_inventory_stocks(unit_ids=[unit_id]):
+                        inventory_stocks += stocks
             units_stocks = group_inventory_stocks(inventory_stocks)
 
             units_balances += compute_balance_in_money_sum(units_stocks)
