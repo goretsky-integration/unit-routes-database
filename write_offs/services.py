@@ -37,10 +37,10 @@ def get_upcoming_write_offs():
     No window used; just `lte` to ensure no silent skips.
     """
     now = datetime.datetime.now(datetime.UTC)
-    target = now + timedelta(minutes=15)
+    target = now + timedelta(minutes=20)
     return IngredientWriteOff.objects.select_related('unit', 'ingredient').filter(
-        is_notification_sent=False,
         to_write_off_at__lte=target,
+        written_off_at__isnull=True,
     )
 
 
