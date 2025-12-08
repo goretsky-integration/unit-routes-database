@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'user_roles.apps.UserRolesConfig',
     'accounts.apps.AccountsConfig',
     'write_offs.apps.WriteOffsConfig',
+    'snapshots.apps.SnapshotsConfig',
 ]
 
 MIDDLEWARE = [

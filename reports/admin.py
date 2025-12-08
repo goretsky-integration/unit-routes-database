@@ -9,12 +9,6 @@ from import_export.resources import ModelResource
 from core.mixins import OnlyDebugAddChangeDeleteMixin
 from reports.models.report_routes import ReportRoute
 from reports.models.report_types import ReportType
-from reports.models.inventory_stocks import InventoryStocks
-
-
-@admin.register(InventoryStocks)
-class InventoryStocksAdmin(admin.ModelAdmin):
-    pass
 
 
 class CategoryParentListFilter(SimpleListFilter):

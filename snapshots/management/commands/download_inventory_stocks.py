@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from reports.use_cases.download_inventory_stocks import \
+from snapshots.use_cases.download_inventory_stocks import \
     DownloadInventoryStocksUseCase
 
 
