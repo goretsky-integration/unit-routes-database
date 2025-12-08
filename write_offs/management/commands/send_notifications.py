@@ -40,5 +40,3 @@ class Command(BaseCommand):
                     ]
                 )
             )
-            write_off.is_notification_sent = True
-            write_off.save(update_fields=['is_notification_sent'])
