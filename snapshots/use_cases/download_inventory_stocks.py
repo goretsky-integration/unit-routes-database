@@ -45,3 +45,7 @@ class DownloadInventoryStocksUseCase:
                         name=f'inventory_stocks_unit_{unit_id}-{now.isoformat()}',
                         data=data,
                     )
+        DodoIsApiResponseSnapshot.objects.filter(
+            name__startswith='inventory_stocks_unit_',
+            created_at__lte=now - datetime.timedelta(days=30),
+        ).delete()
