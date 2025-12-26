@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 from redis import Redis
 
 from accounts.models import AccountTokens
@@ -36,6 +38,7 @@ def is_appropriate_feedback(
 
 
 class CreateFeedbacksReport:
+    timezone = ZoneInfo('Europe/Moscow')
 
     def execute(self) -> None:
         redis = get_redis()
@@ -70,7 +73,7 @@ class CreateFeedbacksReport:
                     continue
 
                 unit_name = unit_id_to_name.get(feedback.unit_id, '?')
-                text = format_feedback(feedback, unit_name)
+                text = format_feedback(feedback, unit_name, self.timezone)
                 chat_ids = (
                     ReportRoute.objects
                     .filter(
