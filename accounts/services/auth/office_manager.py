@@ -116,8 +116,9 @@ def parse_select_role_form(
 
 def parse_sign_in_oidc_form_data(
         sign_in_oidc_form_html: str,
+        scope: str,
 ) -> SignInOidcFormData:
-    required_credentials_names = ('code', 'scope', 'state', 'session_state')
+    required_credentials_names = ('code', 'state', 'session_state')
 
     soup = BeautifulSoup(sign_in_oidc_form_html, 'lxml')
 
@@ -128,7 +129,7 @@ def parse_sign_in_oidc_form_data(
         tag['name']: tag['value']
         for tag in tags_with_credentials
     }
-    return SignInOidcFormData(**sign_in_oidc_form_data)
+    return SignInOidcFormData(**sign_in_oidc_form_data, scope=scope)
 
 
 class OfficeManagerService:
@@ -225,7 +226,8 @@ class OfficeManagerAccountAuthenticator:
                 account_login_form_data=filled_account_login_form_data,
             ))
         sign_in_oidc_form_data = parse_sign_in_oidc_form_data(
-            sign_in_oidc_form_html=sign_in_oidc_form_html
+            sign_in_oidc_form_html=sign_in_oidc_form_html,
+            scope=connect_authorize_form_data.scope,
         )
         return self.__office_manager_service.send_sign_in_oidc_form_data(
             sign_in_oidc_form_data=sign_in_oidc_form_data

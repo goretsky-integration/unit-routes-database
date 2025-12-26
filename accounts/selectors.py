@@ -1,5 +1,3 @@
-from django.db.models import QuerySet
-
 from accounts.exceptions import AccountNotFoundError
 from accounts.models import Account, AccountCookies
 

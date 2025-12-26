@@ -3,18 +3,18 @@ from pathlib import Path
 import sentry_sdk
 from django.utils.translation import gettext_lazy as _
 from environ import Env
-from sentry_sdk.integrations.django import DjangoIntegration
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = Env()
 env.read_env(BASE_DIR / '.env')
 
-SECRET_KEY = env.str('SECRET_KEY')
+SECRET_KEY = env.str('DJANGO_SECRET_KEY')
 
-DEBUG = env.bool('DEBUG')
+DEBUG = env.bool('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'user_roles.apps.UserRolesConfig',
     'accounts.apps.AccountsConfig',
     'write_offs.apps.WriteOffsConfig',
+    'snapshots.apps.SnapshotsConfig',
 ]
 
 MIDDLEWARE = [
@@ -69,11 +70,11 @@ WSGI_APPLICATION = 'goretsky_integration.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env.str('DATABASE_NAME'),
-        'USER': env.str('DATABASE_USER'),
-        'HOST': env.str('DATABASE_HOST'),
-        'PORT': env.int('DATABASE_PORT'),
-        'PASSWORD': env.str('DATABASE_PASSWORD'),
+        'NAME': env.str('DJANGO_DATABASE_NAME'),
+        'USER': env.str('DJANGO_DATABASE_USER'),
+        'HOST': env.str('DJANGO_DATABASE_HOST'),
+        'PORT': env.int('DJANGO_DATABASE_PORT'),
+        'PASSWORD': env.str('DJANGO_DATABASE_PASSWORD'),
     }
 }
 
@@ -96,7 +97,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = env.str('LANGUAGE_CODE')
+LANGUAGE_CODE = env.str('DJANGO_LANGUAGE_CODE')
 
 TIME_ZONE = 'UTC'
 
@@ -123,25 +124,22 @@ LOCALE_PATHS = [
     Path.joinpath(BASE_DIR / 'locale'),
 ]
 
-SENTRY_DSN = env.str('SENTRY_DSN', default=None)
-SENTRY_TRACES_SAMPLE_RATE = env.float('SENTRY_TRACES_SAMPLE_RATE', default=None)
-
-if SENTRY_DSN is not None and SENTRY_TRACES_SAMPLE_RATE is not None:
+SENTRY_DSN = env.str('DJANGO_SENTRY_DSN', default=None)
+if SENTRY_DSN is not None:
     sentry_sdk.init(
-        dsn=env.str('SENTRY_DSN'),
-        integrations=(DjangoIntegration(),),
-        traces_sample_rate=env.float('SENTRY_TRACES_SAMPLE_RATE'),
-        send_default_pii=False,
+        dsn=SENTRY_DSN,
+        send_default_pii=True,
     )
 
-FERNET_KEY = env.str('FERNET_KEY')
+FERNET_KEY = env.str('DJANGO_FERNET_KEY')
 
-DODO_IS_API_CLIENT_ID = env.str('DODO_IS_API_CLIENT_ID')
-DODO_IS_API_CLIENT_SECRET = env.str('DODO_IS_API_CLIENT_SECRET')
+DODO_IS_API_CLIENT_ID = env.str('DJANGO_DODO_IS_API_CLIENT_ID')
+DODO_IS_API_CLIENT_SECRET = env.str('DJANGO_DODO_IS_API_CLIENT_SECRET')
 
-if DEBUG:
-    INSTALLED_APPS.append('silk')
-    MIDDLEWARE.append('silk.middleware.SilkyMiddleware')
+TELEGRAM_BOT_TOKEN = env.str('DJANGO_TELEGRAM_BOT_TOKEN')
 
-CELERY_BROKER_URL = env.str('CELERY_BROKER_URL')
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+GOOGLE_SHEETS_CREDENTIALS = BASE_DIR / 'google_sheets_credentials.json'
+
+REDIS_URL = env.str('DJANGO_REDIS_URL')
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None

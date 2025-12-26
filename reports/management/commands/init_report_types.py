@@ -4,7 +4,6 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from reports.models.report_types import ReportType
-from reports.selectors import get_report_types
 
 
 class Command(BaseCommand):

@@ -12,10 +12,10 @@ from reports.selectors import (
 
 
 def create_report_routes(
-        *,
-        telegram_chat_id: int,
-        report_type_id: int,
-        unit_ids: Iterable[int],
+    *,
+    telegram_chat_id: int,
+    report_type_id: int,
+    unit_ids: Iterable[int],
 ) -> list[ReportRoute]:
     report_routes = [
         ReportRoute(
@@ -31,10 +31,10 @@ def create_report_routes(
 
 
 def delete_report_routes(
-        *,
-        chat_id: int,
-        report_type_id: int,
-        unit_ids: Iterable[int],
+    *,
+    chat_id: int,
+    report_type_id: int,
+    unit_ids: Iterable[int],
 ) -> int:
     report_routes = filter_report_routes_by_chat_id(
         queryset=filter_report_routes_by_report_type_id(
